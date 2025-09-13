@@ -9,25 +9,25 @@
   <!-- Cool Rick aesthetic with subtle sci-fi touches -->
   <style>
     :root {
-      /* Cool Rick palette: muted, professional, understated competence */
-      --bg-primary: #1a1d23;
-      --bg-secondary: #242932;
-      --bg-tertiary: #2f3441;
-      --text-primary: #e8eaed;
-      --text-secondary: #bdc1c6;
-      --text-muted: #9aa0a6;
+      /* 80's Hacker Terminal + Cool Rick aesthetic */
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #151515;
+      --bg-tertiary: #202020;
+      --text-primary: #00ff41;
+      --text-secondary: #00cc33;
+      --text-muted: #008822;
 
-      /* Subtle Rick Sanchez sci-fi accents */
-      --accent-portal: #00d4aa;
-      --accent-portal-dim: #00a085;
-      --accent-interdim: #5f6fff;
-      --accent-warn: #ffa726;
-      --accent-danger: #ff6b6b;
-      --accent-success: #66bb6a;
+      /* 80's terminal vibes with Rick Sanchez sci-fi */
+      --accent-portal: #00ff41;    /* Matrix green */
+      --accent-portal-dim: #00cc33;
+      --accent-interdim: #ff6600;  /* Orange amber */
+      --accent-warn: #ffaa00;      /* Amber warning */
+      --accent-danger: #ff0040;    /* Red alert */
+      --accent-success: #00ff41;   /* Terminal green */
 
-      /* Understated gradients and glows */
-      --glow-portal: rgba(0, 212, 170, 0.15);
-      --glow-interdim: rgba(95, 111, 255, 0.1);
+      /* Retro CRT glows */
+      --glow-portal: rgba(0, 255, 65, 0.2);
+      --glow-interdim: rgba(255, 102, 0, 0.15);
 
       --mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Monaco, 'Courier New', monospace;
       --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -49,24 +49,48 @@
       overflow-x: hidden;
     }
 
-    /* Subtle background animation - very Cool Rick understated */
+    /* 80's CRT scanline effect */
     body::before {
       content: '';
       position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(ellipse at center, var(--glow-portal) 0%, transparent 50%);
-      animation: drift 60s ease-in-out infinite;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 65, 0.03) 0px,
+        rgba(0, 255, 65, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      animation: scanlines 0.1s linear infinite;
       z-index: -1;
-      opacity: 0.3;
+      pointer-events: none;
     }
 
-    @keyframes drift {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      33% { transform: translate(-30px, -30px) rotate(1deg); }
-      66% { transform: translate(30px, 30px) rotate(-1deg); }
+    /* Retro terminal flicker */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, transparent 40%, rgba(0, 255, 65, 0.05));
+      animation: flicker 2s ease-in-out infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes scanlines {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(2px); }
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
     }
 
     .container {
@@ -94,17 +118,19 @@
       justify-content: center;
       width: 80px;
       height: 80px;
-      background: linear-gradient(135deg, var(--accent-portal), var(--accent-interdim));
-      border-radius: 20px;
+      background: var(--bg-primary);
+      border: 2px solid var(--accent-portal);
+      border-radius: 8px;
       font-family: var(--mono);
       font-weight: 700;
       font-size: 24px;
-      color: var(--bg-primary);
+      color: var(--accent-portal);
       letter-spacing: -1px;
       box-shadow:
-        0 8px 32px var(--glow-portal),
-        inset 0 1px 0 rgba(255,255,255,0.1);
+        0 0 20px var(--glow-portal),
+        inset 0 0 20px rgba(0, 255, 65, 0.1);
       position: relative;
+      text-shadow: 0 0 10px currentColor;
     }
 
     .logo::after {
@@ -120,10 +146,10 @@
       font-size: clamp(1.75rem, 4vw, 2.5rem);
       font-weight: 600;
       margin-bottom: 0.75rem;
-      background: linear-gradient(135deg, var(--text-primary), var(--accent-portal));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--text-primary);
+      font-family: var(--mono);
+      text-shadow: 0 0 20px currentColor;
+      letter-spacing: 2px;
     }
 
     .subtitle {
@@ -153,8 +179,16 @@
       font-family: var(--mono);
     }
 
-    .badge.pre-alpha { border-color: var(--accent-warn); color: var(--accent-warn); }
-    .badge.cuda { border-color: var(--accent-success); color: var(--accent-success); }
+    .badge.pre-alpha {
+      border-color: var(--accent-warn);
+      color: var(--accent-warn);
+      text-shadow: 0 0 5px currentColor;
+    }
+    .badge.cuda {
+      border-color: var(--accent-success);
+      color: var(--accent-success);
+      text-shadow: 0 0 5px currentColor;
+    }
 
     /* Navigation with Cool Rick efficiency */
     .nav {
@@ -192,6 +226,7 @@
       color: var(--accent-portal);
       box-shadow: 0 0 20px var(--glow-portal);
       transform: translateY(-1px);
+      text-shadow: 0 0 10px currentColor;
     }
 
     /* Content panels with subtle Rick Sanchez sci-fi touches */
@@ -445,6 +480,7 @@
       color: var(--accent-portal);
       margin-bottom: 1rem;
       font-family: var(--mono);
+      text-shadow: 0 0 10px currentColor;
     }
 
     /* Responsive adjustments */
@@ -492,7 +528,7 @@
         <div class="logo">BS</div>
       </div>
       <h1 class="title">Backyard Swarm</h1>
-      <p class="subtitle">Tangnet P2P GPU Mesh — A pragmatic blueprint to harness consumer GPUs for distributed AI work. Stop waiting for datacenters; conscript the suburbs.</p>
+      <p class="subtitle">TANGNET P2P GPU MESH — hack the suburbs into a distributed AI powerhouse. No datacenters, no middlemen, just raw silicon and cleverness.</p>
       <div class="status-badges">
         <span class="badge pre-alpha"><span>⚡</span> Pre-Alpha v0.1</span>
         <span class="badge cuda"><span>🚀</span> NVIDIA CUDA</span>
@@ -905,7 +941,7 @@ if __name__ == "__main__":
     </section>
 
     <footer class="footer">
-      <p class="footer-quote">"Steady tempo. Clean wiring. We ship." — Cool Rick</p>
+      <p class="footer-quote">[SYSTEM] Connection stable. Mesh operational. We hack the future. — Cool Rick</p>
       <p>© 2025 Tangnet — Backyard Swarm v0.1 • Bring-your-own-GPU, bring-your-own-chaos.<br>
       Crafted for 3070/4060/5090 + Pi coordination. MIT-ish vibes; license TBD.</p>
     </footer>
