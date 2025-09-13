@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Demo — Backyard Swarm in Action</title>
+  <meta name="description" content="Interactive demonstration of Backyard Swarm distributed GPU mesh running real AI workloads across heterogeneous hardware." />
+
+  <!-- Cool Rick aesthetic with subtle sci-fi touches -->
+  <style>
+    :root {
+      /* Cool Rick palette: muted, professional, understated competence */
+      --bg-primary: #1a1d23;
+      --bg-secondary: #242932;
+      --bg-tertiary: #2f3441;
+      --text-primary: #e8eaed;
+      --text-secondary: #bdc1c6;
+      --text-muted: #9aa0a6;
+
+      /* Subtle Rick Sanchez sci-fi accents */
+      --accent-portal: #00d4aa;
+      --accent-portal-dim: #00a085;
+      --accent-interdim: #5f6fff;
+      --accent-warn: #ffa726;
+      --accent-danger: #ff6b6b;
+      --accent-success: #66bb6a;
+
+      /* Understated gradients and glows */
+      --glow-portal: rgba(0, 212, 170, 0.15);
+      --glow-interdim: rgba(95, 111, 255, 0.1);
+
+      --mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Monaco, 'Courier New', monospace;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: var(--sans);
+      line-height: 1.6;
+      font-size: 16px;
+      overflow-x: hidden;
+    }
+
+    /* Enhanced background animation for demo */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, var(--glow-portal) 0%, transparent 50%);
+      animation: drift 45s ease-in-out infinite;
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-20px, -20px) rotate(0.5deg); }
+      50% { transform: translate(20px, -30px) rotate(-0.5deg); }
+      75% { transform: translate(-30px, 20px) rotate(0.25deg); }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--bg-tertiary);
+      position: relative;
+    }
+
+    .back-link {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      color: var(--accent-portal);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: opacity 0.2s ease;
+    }
+
+    .back-link:hover { opacity: 0.8; }
+
+    .logo-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--accent-portal), var(--accent-interdim));
+      border-radius: 16px;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--bg-primary);
+      letter-spacing: -1px;
+      box-shadow: 0 8px 32px var(--glow-portal), inset 0 1px 0 rgba(255,255,255,0.1);
+      position: relative;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 8px 32px var(--glow-portal), inset 0 1px 0 rgba(255,255,255,0.1); }
+      50% { box-shadow: 0 12px 48px var(--glow-portal), inset 0 1px 0 rgba(255,255,255,0.15); }
+    }
+
+    .title {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-portal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Demo Dashboard */
+    .demo-dashboard {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .demo-dashboard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-portal), var(--accent-interdim), transparent);
+      opacity: 0.6;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cluster-status {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .status-metric {
+      text-align: center;
+    }
+
+    .status-metric .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      color: var(--accent-portal);
+      display: block;
+    }
+
+    .status-metric .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(102, 187, 106, 0.1);
+      border: 1px solid var(--accent-success);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--accent-success);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-success);
+      border-radius: 50%;
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Node Grid */
+    .node-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .node-card {
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 1.5rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .node-card:hover {
+      border-color: var(--glow-portal);
+      box-shadow: 0 0 30px var(--glow-portal);
+      transform: translateY(-2px);
+    }
+
+    .node-card.coordinator {
+      border-color: var(--accent-interdim);
+      background: linear-gradient(135deg, rgba(95, 111, 255, 0.05), var(--bg-tertiary));
+    }
+
+    .node-card.worker {
+      border-color: var(--accent-portal);
+      background: linear-gradient(135deg, rgba(0, 212, 170, 0.05), var(--bg-tertiary));
+    }
+
+    .node-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .node-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .node-type {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .node-type.coordinator {
+      background: rgba(95, 111, 255, 0.2);
+      color: var(--accent-interdim);
+    }
+
+    .node-type.worker {
+      background: rgba(0, 212, 170, 0.2);
+      color: var(--accent-portal);
+    }
+
+    .node-specs {
+      margin-bottom: 1rem;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .spec-label {
+      color: var(--text-muted);
+    }
+
+    .spec-value {
+      color: var(--text-secondary);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+
+    .utilization-bar {
+      margin-top: 1rem;
+    }
+
+    .util-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .util-bar {
+      height: 6px;
+      background: var(--bg-primary);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .util-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 2s ease;
+      position: relative;
+    }
+
+    .util-fill.gpu {
+      background: linear-gradient(90deg, var(--accent-portal), var(--accent-success));
+    }
+
+    .util-fill.cpu {
+      background: linear-gradient(90deg, var(--accent-interdim), var(--accent-portal));
+    }
+
+    /* Active Jobs */
+    .jobs-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      border-left: 4px solid var(--accent-portal);
+      padding-left: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .jobs-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .job-card {
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .job-info h4 {
+      color: var(--accent-portal);
+      margin-bottom: 0.25rem;
+      font-size: 0.95rem;
+    }
+
+    .job-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .job-progress {
+      text-align: right;
+      min-width: 120px;
+    }
+
+    .progress-value {
+      font-family: var(--mono);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      width: 100px;
+      height: 4px;
+      background: var(--bg-primary);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-portal), var(--accent-success));
+      border-radius: 2px;
+      transition: width 1.5s ease;
+    }
+
+    /* Performance Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .metric-card {
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      color: var(--accent-portal);
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-change {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      font-family: var(--mono);
+    }
+
+    .metric-change.positive {
+      color: var(--accent-success);
+    }
+
+    .metric-change.negative {
+      color: var(--accent-warn);
+    }
+
+    /* Console Output */
+    .console {
+      background: var(--bg-primary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.4;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+
+    .console-line {
+      margin-bottom: 0.25rem;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .console-timestamp {
+      color: var(--text-muted);
+    }
+
+    .console-level {
+      font-weight: 600;
+    }
+
+    .console-level.info { color: var(--accent-portal); }
+    .console-level.success { color: var(--accent-success); }
+    .console-level.warn { color: var(--accent-warn); }
+
+    .console-message {
+      color: var(--text-secondary);
+    }
+
+    /* Interactive Controls */
+    .demo-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .demo-button {
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--accent-portal);
+      border-radius: 12px;
+      color: var(--accent-portal);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .demo-button:hover {
+      background: var(--accent-portal);
+      color: var(--bg-primary);
+      box-shadow: 0 0 20px var(--glow-portal);
+    }
+
+    .demo-button.active {
+      background: var(--accent-portal);
+      color: var(--bg-primary);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--bg-tertiary);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-quote {
+      font-style: italic;
+      color: var(--accent-portal);
+      margin-bottom: 1rem;
+      font-family: var(--mono);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .demo-dashboard { padding: 1.5rem; }
+      .dashboard-header { flex-direction: column; align-items: flex-start; }
+      .cluster-status { justify-content: space-between; width: 100%; }
+      .node-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <script>
+    // Demo simulation data and logic
+    let demoInterval;
+    let currentScenario = 'embeddings';
+
+    const scenarios = {
+      embeddings: {
+        name: 'Text Embeddings Farm',
+        jobs: [
+          { name: 'Reddit Comments Embedding', type: 'sentence-transformers', progress: 73, tasks: '1247/1700', node: 'rtx-5090' },
+          { name: 'Wikipedia Articles', type: 'all-MiniLM-L6-v2', progress: 91, tasks: '2891/3200', node: 'rtx-4060' },
+          { name: 'Customer Reviews', type: 'e5-base-v2', progress: 45, tasks: '450/1000', node: 'rtx-3070' }
+        ],
+        metrics: {
+          throughput: '2.4K docs/sec',
+          efficiency: '94%',
+          vectors: '847K',
+          storage: '12.3 GB'
+        }
+      },
+      diffusion: {
+        name: 'Image Generation Pipeline',
+        jobs: [
+          { name: 'SDXL Batch Render', type: 'stabilityai/sdxl-turbo', progress: 82, tasks: '328/400', node: 'rtx-5090' },
+          { name: 'Style Transfer', type: 'kandinsky-2-2', progress: 67, tasks: '134/200', node: 'rtx-4060' },
+          { name: 'Upscaling Queue', type: 'real-esrgan', progress: 34, tasks: '68/200', node: 'rtx-3070' }
+        ],
+        metrics: {
+          throughput: '47 img/min',
+          efficiency: '89%',
+          images: '1,247',
+          storage: '8.9 GB'
+        }
+      },
+      training: {
+        name: 'Federated LoRA Training',
+        jobs: [
+          { name: 'Llama-2-7B LoRA', type: 'federated-avg', progress: 23, tasks: 'epoch 4/17', node: 'rtx-5090' },
+          { name: 'Adapter Sync', type: 'gossip-sgd', progress: 78, tasks: 'round 23/30', node: 'coordinator' },
+          { name: 'Validation Run', type: 'distributed-eval', progress: 56, tasks: '1120/2000', node: 'rtx-4060' }
+        ],
+        metrics: {
+          throughput: '184 tokens/sec',
+          efficiency: '87%',
+          parameters: '4.2M',
+          convergence: '0.0234'
+        }
+      }
+    };
+
+    function updateDemo() {
+      const scenario = scenarios[currentScenario];
+
+      // Update jobs
+      const jobsGrid = document.querySelector('.jobs-grid');
+      jobsGrid.innerHTML = '';
+
+      scenario.jobs.forEach((job, index) => {
+        const progressValue = Math.min(100, job.progress + Math.random() * 3 - 1.5);
+        const jobCard = document.createElement('div');
+        jobCard.className = 'job-card';
+        jobCard.innerHTML = `
+          <div class="job-info">
+            <h4>${job.name}</h4>
+            <div class="job-meta">${job.type} → ${job.node}</div>
+          </div>
+          <div class="job-progress">
+            <div class="progress-value">${Math.round(progressValue)}%</div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${progressValue}%"></div>
+            </div>
+          </div>
+        `;
+        jobsGrid.appendChild(jobCard);
+      });
+
+      // Update metrics
+      const metrics = document.querySelectorAll('.metric-value');
+      const metricLabels = ['throughput', 'efficiency', 'vectors', 'storage'];
+      metricLabels.forEach((label, index) => {
+        if (metrics[index] && scenario.metrics[label]) {
+          metrics[index].textContent = scenario.metrics[label];
+        }
+      });
+
+      // Update utilization bars with some randomness
+      const gpuBars = document.querySelectorAll('.util-fill.gpu');
+      const cpuBars = document.querySelectorAll('.util-fill.cpu');
+
+      gpuBars.forEach(bar => {
+        const newWidth = Math.max(20, Math.min(95, parseFloat(bar.style.width || '50') + Math.random() * 10 - 5));
+        bar.style.width = newWidth + '%';
+      });
+
+      cpuBars.forEach(bar => {
+        const newWidth = Math.max(10, Math.min(70, parseFloat(bar.style.width || '25') + Math.random() * 8 - 4));
+        bar.style.width = newWidth + '%';
+      });
+
+      // Add console line
+      addConsoleMessage(scenario.name);
+    }
+
+    function addConsoleMessage(scenarioName) {
+      const console = document.querySelector('.console');
+      const messages = [
+        `[${new Date().toLocaleTimeString()}] <span class="console-level info">INFO</span> <span class="console-message">Task completed on node rtx-${Math.random() > 0.5 ? '5090' : '4060'}</span>`,
+        `[${new Date().toLocaleTimeString()}] <span class="console-level success">SUCCESS</span> <span class="console-message">Batch ${Math.floor(Math.random() * 1000 + 100)} processed successfully</span>`,
+        `[${new Date().toLocaleTimeString()}] <span class="console-level info">INFO</span> <span class="console-message">GPU utilization: ${Math.floor(Math.random() * 30 + 70)}%</span>`,
+        `[${new Date().toLocaleTimeString()}] <span class="console-level info">INFO</span> <span class="console-message">Worker heartbeat received from ${Math.random() > 0.6 ? 'rtx-3070' : 'rtx-4060'}</span>`
+      ];
+
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      line.innerHTML = `<span class="console-timestamp">[${new Date().toLocaleTimeString()}]</span> ${messages[Math.floor(Math.random() * messages.length)].split('] ')[1]}`;
+
+      console.appendChild(line);
+
+      // Keep only last 20 lines
+      const lines = console.querySelectorAll('.console-line');
+      if (lines.length > 20) {
+        lines[0].remove();
+      }
+
+      console.scrollTop = console.scrollHeight;
+    }
+
+    function switchScenario(scenario) {
+      currentScenario = scenario;
+
+      // Update button states
+      document.querySelectorAll('.demo-button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update scenario title
+      document.querySelector('.scenario-title').textContent = scenarios[scenario].name;
+
+      // Immediate update
+      updateDemo();
+    }
+
+    // Initialize demo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set initial utilization values
+      document.querySelectorAll('.util-fill.gpu').forEach(bar => {
+        bar.style.width = (Math.random() * 40 + 50) + '%';
+      });
+      document.querySelectorAll('.util-fill.cpu').forEach(bar => {
+        bar.style.width = (Math.random() * 30 + 20) + '%';
+      });
+
+      // Start demo updates
+      updateDemo();
+      demoInterval = setInterval(updateDemo, 3000);
+
+      // Add some initial console messages
+      setTimeout(() => addConsoleMessage('System startup'), 500);
+      setTimeout(() => addConsoleMessage('Workers connected'), 1000);
+      setTimeout(() => addConsoleMessage('Jobs initialized'), 1500);
+    });
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="index.html" class="back-link">← Back to Main</a>
+      <div class="logo-container">
+        <div class="logo">🔥</div>
+      </div>
+      <h1 class="title">Live Demo</h1>
+      <p class="subtitle">See your Backyard Swarm in action — real-time distributed AI workloads across heterogeneous hardware</p>
+    </header>
+
+    <div class="demo-controls">
+      <button class="demo-button active" onclick="switchScenario('embeddings')">📝 Text Embeddings</button>
+      <button class="demo-button" onclick="switchScenario('diffusion')">🎨 Image Generation</button>
+      <button class="demo-button" onclick="switchScenario('training')">🧠 LoRA Training</button>
+    </div>
+
+    <div class="demo-dashboard">
+      <div class="dashboard-header">
+        <h2 class="scenario-title">Text Embeddings Farm</h2>
+        <div class="cluster-status">
+          <div class="status-metric">
+            <span class="value">4</span>
+            <span class="label">Active Nodes</span>
+          </div>
+          <div class="status-metric">
+            <span class="value">37.2</span>
+            <span class="label">Total VRAM (GB)</span>
+          </div>
+          <div class="status-metric">
+            <span class="value">3</span>
+            <span class="label">Running Jobs</span>
+          </div>
+        </div>
+        <div class="live-indicator">
+          <div class="live-dot"></div>
+          <span>Live System</span>
+        </div>
+      </div>
+
+      <div class="node-grid">
+        <div class="node-card coordinator">
+          <div class="node-header">
+            <div class="node-name">raspberry-pi-4</div>
+            <div class="node-type coordinator">Coordinator</div>
+          </div>
+          <div class="node-specs">
+            <div class="spec-row">
+              <span class="spec-label">Type:</span>
+              <span class="spec-value">ARM Cortex-A72</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">RAM:</span>
+              <span class="spec-value">8 GB</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Role:</span>
+              <span class="spec-value">Ray Head + API</span>
+            </div>
+          </div>
+          <div class="utilization-bar">
+            <div class="util-label">
+              <span>CPU Usage</span>
+              <span>34%</span>
+            </div>
+            <div class="util-bar">
+              <div class="util-fill cpu" style="width: 34%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="node-card worker">
+          <div class="node-header">
+            <div class="node-name">desktop-rtx5090</div>
+            <div class="node-type worker">Worker</div>
+          </div>
+          <div class="node-specs">
+            <div class="spec-row">
+              <span class="spec-label">GPU:</span>
+              <span class="spec-value">RTX 5090</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">VRAM:</span>
+              <span class="spec-value">24 GB</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">CUDA Cores:</span>
+              <span class="spec-value">16,384</span>
+            </div>
+          </div>
+          <div class="utilization-bar">
+            <div class="util-label">
+              <span>GPU Usage</span>
+              <span>87%</span>
+            </div>
+            <div class="util-bar">
+              <div class="util-fill gpu" style="width: 87%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="node-card worker">
+          <div class="node-header">
+            <div class="node-name">laptop-rtx4060</div>
+            <div class="node-type worker">Worker</div>
+          </div>
+          <div class="node-specs">
+            <div class="spec-row">
+              <span class="spec-label">GPU:</span>
+              <span class="spec-value">RTX 4060</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">VRAM:</span>
+              <span class="spec-value">8 GB</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">CUDA Cores:</span>
+              <span class="spec-value">3,072</span>
+            </div>
+          </div>
+          <div class="utilization-bar">
+            <div class="util-label">
+              <span>GPU Usage</span>
+              <span>73%</span>
+            </div>
+            <div class="util-bar">
+              <div class="util-fill gpu" style="width: 73%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="node-card worker">
+          <div class="node-header">
+            <div class="node-name">workstation-rtx3070</div>
+            <div class="node-type worker">Worker</div>
+          </div>
+          <div class="node-specs">
+            <div class="spec-row">
+              <span class="spec-label">GPU:</span>
+              <span class="spec-value">RTX 3070</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">VRAM:</span>
+              <span class="spec-value">8 GB</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">CUDA Cores:</span>
+              <span class="spec-value">5,888</span>
+            </div>
+          </div>
+          <div class="utilization-bar">
+            <div class="util-label">
+              <span>GPU Usage</span>
+              <span>61%</span>
+            </div>
+            <div class="util-bar">
+              <div class="util-fill gpu" style="width: 61%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="jobs-section">
+      <h2 class="section-title">🔥 Active Workloads</h2>
+      <div class="jobs-grid">
+        <!-- Jobs populated by JavaScript -->
+      </div>
+    </div>
+
+    <div class="jobs-section">
+      <h2 class="section-title">📊 Performance Metrics</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-value">2.4K</span>
+          <div class="metric-label">Throughput</div>
+          <div class="metric-change positive">↗ +12% vs last hour</div>
+        </div>
+        <div class="metric-card">
+          <span class="metric-value">94%</span>
+          <div class="metric-label">Efficiency</div>
+          <div class="metric-change positive">↗ +3.2%</div>
+        </div>
+        <div class="metric-card">
+          <span class="metric-value">847K</span>
+          <div class="metric-label">Items Processed</div>
+          <div class="metric-change positive">↗ +247K</div>
+        </div>
+        <div class="metric-card">
+          <span class="metric-value">12.3 GB</span>
+          <div class="metric-label">Data Generated</div>
+          <div class="metric-change positive">↗ +1.8 GB</div>
+        </div>
+      </div>
+
+      <div class="console">
+        <!-- Console output populated by JavaScript -->
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p class="footer-quote">"Real systems. Real workloads. Real results." — Cool Rick</p>
+      <p>This demo simulates a live Backyard Swarm cluster. <a href="user-guide.html" style="color: var(--accent-portal);">Build your own</a> and see these results for real.</p>
+    </footer>
+  </div>
+</body>
+</html>
