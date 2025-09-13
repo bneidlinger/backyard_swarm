@@ -1,0 +1,25 @@
+services:
+  coordinator:
+    image: ghcr.io/tangnet/backyard-coordinator:0.1
+    container_name: backyard-coordinator
+    ports:
+      - "8080:8080"   # REST
+      - "8265:8265"   # Ray dashboard (if using Ray internally)
+    environment:
+      - STORAGE_URL=http://minio:9000
+      - STORAGE_BUCKET=backyard
+      - STORAGE_ACCESS=minio
+      - STORAGE_SECRET=minio123
+    networks: [swarm]
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports: ["9000:9000","9001:9001"]
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    volumes:
+      - ./minio:/data
+    networks: [swarm]
+networks:
+  swarm: {}

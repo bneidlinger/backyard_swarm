@@ -1,6 +1,8 @@
 # Backyard Swarm 🐝 — Tangnet P2P GPU Mesh (v0.1)
 
-> *Cool, calm, and a little dangerous.* Think **Cool Rick** (from *Patriot*), sipping burnt office coffee, quietly wiring the building to run on vibes — with a dash of **Rick Sanchez** muttering, “Yeah, decentralized, Morty — because WAN bandwidth doesn’t care about your monolithic attention layer.”
+📖 **[View Full Documentation](https://bneidlinger.github.io/backyard_swarm/)**
+
+> *Cool, calm, and a little dangerous.* Think **Cool Rick** (from *Patriot*), sipping burnt office coffee, quietly wiring the building to run on vibes — with a dash of **Rick Sanchez** muttering, "Yeah, decentralized, Morty — because WAN bandwidth doesn't care about your monolithic attention layer."
 
 **Mission:** If datacenters are booked out till the heat death, we conscript the suburbs. **Backyard Swarm** lets you stitch together consumer GPUs (3070, 4060, your brother’s 5090 in Ann Arbor, and a Pi control node) into a small **P2P compute mesh** that runs *useful* AI workloads **today**, and evolves toward **federated LoRA** training + **MoE/speculative** inference.
 

@@ -1,0 +1,30 @@
+# Backyard Swarm Core Dependencies
+# Distributed computing and cluster management
+ray[default]==2.8.0
+
+# API framework and async support
+fastapi==0.104.1
+uvicorn==0.24.0.post1
+pydantic==2.5.0
+
+# Object storage client (MinIO/S3)
+boto3==1.34.0
+
+# System monitoring and GPU detection
+psutil==5.9.6
+nvidia-ml-py==12.535.133
+requests==2.31.0
+
+# ML and AI dependencies
+torch==2.1.0
+sentence-transformers==2.2.2
+diffusers==0.24.0
+transformers==4.35.2
+accelerate==0.24.1
+
+# Data processing
+numpy==1.24.4
+pillow==10.1.0
+
+# Optional: Better async support
+aiofiles==23.2.1

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User Guide — Backyard Swarm</title>
+  <meta name="description" content="Complete guide to running and using Backyard Swarm for distributed AI workloads. Learn how to deploy, monitor, and optimize your P2P GPU mesh." />
+
+  <!-- Cool Rick aesthetic with subtle sci-fi touches -->
+  <style>
+    :root {
+      /* Cool Rick palette: muted, professional, understated competence */
+      --bg-primary: #1a1d23;
+      --bg-secondary: #242932;
+      --bg-tertiary: #2f3441;
+      --text-primary: #e8eaed;
+      --text-secondary: #bdc1c6;
+      --text-muted: #9aa0a6;
+
+      /* Subtle Rick Sanchez sci-fi accents */
+      --accent-portal: #00d4aa;
+      --accent-portal-dim: #00a085;
+      --accent-interdim: #5f6fff;
+      --accent-warn: #ffa726;
+      --accent-danger: #ff6b6b;
+      --accent-success: #66bb6a;
+
+      /* Understated gradients and glows */
+      --glow-portal: rgba(0, 212, 170, 0.15);
+      --glow-interdim: rgba(95, 111, 255, 0.1);
+
+      --mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Monaco, 'Courier New', monospace;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: var(--sans);
+      line-height: 1.6;
+      font-size: 16px;
+      overflow-x: hidden;
+    }
+
+    /* Subtle background animation - very Cool Rick understated */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, var(--glow-portal) 0%, transparent 50%);
+      animation: drift 60s ease-in-out infinite;
+      z-index: -1;
+      opacity: 0.3;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(-30px, -30px) rotate(1deg); }
+      66% { transform: translate(30px, 30px) rotate(-1deg); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header with Cool Rick understated confidence */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--bg-tertiary);
+      position: relative;
+    }
+
+    .back-link {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      color: var(--accent-portal);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: opacity 0.2s ease;
+    }
+
+    .back-link:hover {
+      opacity: 0.8;
+    }
+
+    .logo-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--accent-portal), var(--accent-interdim));
+      border-radius: 16px;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--bg-primary);
+      letter-spacing: -1px;
+      box-shadow:
+        0 8px 32px var(--glow-portal),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      position: relative;
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1));
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .title {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-portal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Navigation with Cool Rick efficiency */
+    .nav {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .nav-item {
+      display: block;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-primary);
+      border-color: var(--accent-portal);
+      color: var(--accent-portal);
+      box-shadow: 0 0 20px var(--glow-portal);
+      transform: translateY(-1px);
+    }
+
+    /* Content panels with subtle Rick Sanchez sci-fi touches */
+    .panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow:
+        0 4px 24px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-portal), transparent);
+      opacity: 0.3;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      border-left: 4px solid var(--accent-portal);
+      padding-left: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent-portal), transparent);
+      opacity: 0.3;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .card {
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--glow-portal);
+      box-shadow: 0 0 20px var(--glow-portal);
+    }
+
+    .card h3 {
+      color: var(--accent-portal);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .card p {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .card ul {
+      list-style: none;
+    }
+
+    .card ul li {
+      margin: 0.5rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+      color: var(--text-secondary);
+    }
+
+    .card ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-portal);
+      font-weight: bold;
+    }
+
+    /* Code blocks with Rick Sanchez lab aesthetic */
+    .code-container {
+      margin: 1.5rem 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--bg-tertiary);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-primary);
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .code-title {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--accent-portal);
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-portal);
+      color: var(--bg-primary);
+      border-color: var(--accent-portal);
+    }
+
+    pre {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      padding: 1.25rem;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--mono);
+      background: var(--bg-tertiary);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    /* Step indicators */
+    .step-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      background: var(--accent-portal);
+      color: var(--bg-primary);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-right: 0.75rem;
+    }
+
+    /* Callouts with Cool Rick authority */
+    .callout {
+      background: linear-gradient(135deg, var(--glow-interdim), transparent);
+      border: 1px solid var(--accent-interdim);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--accent-interdim);
+    }
+
+    .callout.warning {
+      background: linear-gradient(135deg, rgba(255, 167, 38, 0.1), transparent);
+      border-color: var(--accent-warn);
+      border-left-color: var(--accent-warn);
+    }
+
+    .callout.success {
+      background: linear-gradient(135deg, rgba(102, 187, 106, 0.1), transparent);
+      border-color: var(--accent-success);
+      border-left-color: var(--accent-success);
+    }
+
+    .callout strong {
+      color: var(--accent-interdim);
+    }
+
+    .callout.warning strong {
+      color: var(--accent-warn);
+    }
+
+    .callout.success strong {
+      color: var(--accent-success);
+    }
+
+    /* Progress indicators */
+    .progress-bar {
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-fill {
+      height: 8px;
+      background: linear-gradient(90deg, var(--accent-portal), var(--accent-interdim));
+      transition: width 0.3s ease;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--bg-tertiary);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-quote {
+      font-style: italic;
+      color: var(--accent-portal);
+      margin-bottom: 1rem;
+      font-family: var(--mono);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .panel { padding: 1.5rem; }
+      .nav-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <!-- Enhanced copy-to-clipboard with Cool Rick feedback -->
+  <script>
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.copy-btn');
+      if (!btn) return;
+
+      const container = btn.closest('.code-container');
+      const pre = container?.querySelector('pre');
+      if (!pre) return;
+
+      try {
+        await navigator.clipboard.writeText(pre.textContent);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>✓</span> Copied';
+        btn.style.background = 'var(--accent-success)';
+        btn.style.color = 'var(--bg-primary)';
+
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 1500);
+      } catch (err) {
+        console.warn('Copy failed:', err);
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="index.html" class="back-link">← Back to Main</a>
+      <div class="logo-container">
+        <div class="logo">UG</div>
+      </div>
+      <h1 class="title">User Guide</h1>
+      <p class="subtitle">Complete guide to deploying, running, and optimizing your distributed GPU mesh</p>
+    </header>
+
+    <nav class="nav">
+      <div class="nav-grid">
+        <a class="nav-item" href="#setup">Setup</a>
+        <a class="nav-item" href="#deployment">Deployment</a>
+        <a class="nav-item" href="#monitoring">Monitoring</a>
+        <a class="nav-item" href="#workloads">Running Jobs</a>
+        <a class="nav-item" href="#optimization">Optimization</a>
+        <a class="nav-item" href="#troubleshooting">Troubleshooting</a>
+      </div>
+    </nav>
+
+    <section id="setup" class="panel">
+      <h2 class="section-title">Initial Setup & Environment Preparation</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3><span class="step-indicator">1</span>System Requirements</h3>
+          <p>Before you begin, ensure each machine meets these requirements:</p>
+          <ul>
+            <li><strong>GPU:</strong> NVIDIA RTX 3070, 4060, 5090, or similar</li>
+            <li><strong>OS:</strong> Ubuntu 20.04+ or Windows with WSL2</li>
+            <li><strong>RAM:</strong> 16GB+ recommended</li>
+            <li><strong>Storage:</strong> 50GB+ free space</li>
+            <li><strong>Network:</strong> Reliable internet connection</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3><span class="step-indicator">2</span>Software Prerequisites</h3>
+          <p>Install these components on all machines:</p>
+          <ul>
+            <li>Docker with NVIDIA Container Runtime</li>
+            <li>NVIDIA GPU drivers (latest stable)</li>
+            <li>Python 3.10+ (for running jobs)</li>
+            <li>Git (for cloning repositories)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3><span class="step-indicator">3</span>Network Setup</h3>
+          <p>Choose your networking approach:</p>
+          <ul>
+            <li><strong>LAN Only:</strong> All machines on same network</li>
+            <li><strong>Tailscale (Recommended):</strong> Secure mesh VPN</li>
+            <li><strong>WireGuard:</strong> Self-hosted VPN solution</li>
+            <li><strong>Public Internet:</strong> Advanced configuration needed</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Pro Tip:</strong> Start with a 2-machine setup on your local network before expanding. This lets you verify everything works before adding complexity.
+      </div>
+    </section>
+
+    <section id="deployment" class="panel">
+      <h2 class="section-title">Deployment Walkthrough</h2>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Step 1: Prepare Your Machines</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Install Dependencies (Ubuntu/WSL)</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># Run on all GPU machines
+cd backyard_swarm_scripts
+sudo bash scripts/bs_install_linux.sh
+
+# Join Tailscale network (recommended)
+sudo tailscale up
+
+# Verify installation
+bash scripts/bs_detect.sh</pre>
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Step 2: Build Docker Images</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Build Images (Run Once)</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># Build coordinator and worker images
+bash docker/build.sh
+
+# Verify images were created
+docker images | grep backyard</pre>
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Step 3: Start the Coordinator</h3>
+
+      <div class="card">
+        <h3>Choose Your Coordinator Machine</h3>
+        <p>The coordinator should be:</p>
+        <ul>
+          <li><strong>Always available:</strong> Raspberry Pi, server, or dedicated machine</li>
+          <li><strong>Stable network:</strong> Consistent IP address or hostname</li>
+          <li><strong>Central location:</strong> Good connectivity to all workers</li>
+        </ul>
+      </div>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Start Coordinator</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># On coordinator machine
+bash scripts/bs_coordinator_up.sh
+
+# Check coordinator status
+bash scripts/bs_status.sh</pre>
+      </div>
+
+      <div class="callout success">
+        <strong>Success Indicators:</strong> You should see MinIO and coordinator containers running, and be able to access `http://coordinator-ip:8080/healthz` in your browser.
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Step 4: Join GPU Workers</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Start Workers (Each GPU Machine)</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># Replace with your coordinator's IP address
+COORDINATOR_IP="192.168.1.100"  # or Tailscale IP like 100.x.y.z
+
+# Start worker
+bash scripts/bs_worker_up.sh -c http://${COORDINATOR_IP}:8080
+
+# Verify worker is running
+docker logs -f backyard-worker</pre>
+      </div>
+
+      <div class="callout">
+        <strong>Tailscale Users:</strong> Use your Tailscale IP addresses for better security and easier setup. Find them with `tailscale ip -4`.
+      </div>
+    </section>
+
+    <section id="monitoring" class="panel">
+      <h2 class="section-title">Monitoring Your Swarm</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Ray Dashboard</h3>
+          <p>Primary monitoring interface for your cluster:</p>
+          <ul>
+            <li><strong>URL:</strong> <code>http://coordinator:8265</code></li>
+            <li><strong>Shows:</strong> Node topology, resource usage, active jobs</li>
+            <li><strong>Real-time:</strong> Updates as jobs run and complete</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>API Endpoints</h3>
+          <p>Programmatic access to cluster status:</p>
+          <ul>
+            <li><code>/healthz</code> - Service health check</li>
+            <li><code>/workers</code> - List registered workers</li>
+            <li><code>/cluster/status</code> - Detailed cluster info</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Container Logs</h3>
+          <p>Debug issues with detailed logging:</p>
+          <ul>
+            <li><code>docker logs backyard-coordinator</code></li>
+            <li><code>docker logs backyard-worker</code></li>
+            <li><strong>Tip:</strong> Use <code>-f</code> flag for live following</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Health Check Commands</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">System Status Overview</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># Check overall system health
+bash scripts/bs_status.sh http://coordinator:8080
+
+# Get detailed worker information
+curl http://coordinator:8080/workers | jq
+
+# View cluster resources
+curl http://coordinator:8080/cluster/status | jq</pre>
+      </div>
+
+      <div class="callout warning">
+        <strong>Important:</strong> Workers send heartbeats every 30 seconds. If a worker stops responding for 5 minutes, it's automatically removed from the cluster.
+      </div>
+    </section>
+
+    <section id="workloads" class="panel">
+      <h2 class="section-title">Running Distributed Workloads</h2>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Quick Test - Embeddings</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Run Basic Smoke Test</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># This creates test data and runs embeddings across your mesh
+bash scripts/bs_smoketest.sh
+
+# Check results
+ls -la /data/
+cat /data/corpus.embeddings.json</pre>
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Custom Jobs</h3>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Text Embeddings</h3>
+          <p>Process large text datasets in parallel:</p>
+          <div class="code-container">
+            <div class="code-header">
+              <span class="code-title">embeddings.py</span>
+              <button class="copy-btn">📋 Copy</button>
+            </div>
+            <pre>python jobs/embeddings.py \
+  --input /data/documents.txt \
+  --shards 32 \
+  --out /data/embeddings.json</pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Image Generation</h3>
+          <p>Generate images using Stable Diffusion:</p>
+          <div class="code-container">
+            <div class="code-header">
+              <span class="code-title">sd_batch.py</span>
+              <button class="copy-btn">📋 Copy</button>
+            </div>
+            <pre>python jobs/sd_batch.py \
+  --prompts /data/prompts.txt \
+  --out /data/generated</pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Writing Custom Jobs</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Custom Ray Job Template</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>import ray
+
+# Connect to your swarm
+ray.init(address="auto")
+
+@ray.remote(num_gpus=0.5)  # Use half a GPU per task
+def process_batch(data_batch):
+    """Your custom processing logic here"""
+    import torch
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Your GPU-accelerated code
+    result = your_model(data_batch.to(device))
+    return result.cpu()
+
+# Submit work across the mesh
+batches = [batch1, batch2, batch3, ...]
+futures = [process_batch.remote(batch) for batch in batches]
+
+# Collect results
+results = ray.get(futures)
+print(f"Processed {len(results)} batches across the swarm!")</pre>
+      </div>
+
+      <div class="callout">
+        <strong>Resource Management:</strong> Use <code>num_gpus=0.5</code> to run multiple tasks per GPU, or <code>num_gpus=1</code> for exclusive access. Ray automatically handles scheduling across your heterogeneous hardware.
+      </div>
+    </section>
+
+    <section id="optimization" class="panel">
+      <h2 class="section-title">Performance Optimization</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>GPU Memory Management</h3>
+          <p>Optimize memory usage for your workloads:</p>
+          <ul>
+            <li>Set <code>PYTORCH_CUDA_ALLOC_CONF</code> for memory efficiency</li>
+            <li>Use gradient checkpointing for large models</li>
+            <li>Monitor memory usage via Ray dashboard</li>
+            <li>Adjust batch sizes based on available VRAM</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Network Optimization</h3>
+          <p>Minimize network bottlenecks:</p>
+          <ul>
+            <li>Use local storage for large datasets</li>
+            <li>Compress data before transmission</li>
+            <li>Consider data locality in task scheduling</li>
+            <li>Monitor bandwidth usage in production</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Heterogeneous Hardware</h3>
+          <p>Make the most of mixed GPU types:</p>
+          <ul>
+            <li>Assign compute-heavy tasks to high-end GPUs</li>
+            <li>Use older GPUs for preprocessing/postprocessing</li>
+            <li>Balance workloads based on VRAM capacity</li>
+            <li>Set appropriate <code>num_gpus</code> values per task</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Environment Tuning</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Worker Performance Configuration</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># Create optimized worker configuration
+cat > configs/production.env << EOF
+# Memory optimization
+PYTORCH_CUDA_ALLOC_CONF="max_split_size_mb:128,garbage_collection_threshold:0.8"
+
+# GPU architecture targeting
+TORCH_CUDA_ARCH_LIST="8.6;8.9"  # RTX 3070=8.6, RTX 4060=8.9
+
+# Ray worker settings
+RAY_memory_usage_threshold=0.95
+RAY_object_store_memory_threshold=0.8
+
+# Custom paths
+MODELS_DIR=/fast_storage/models
+DATA_DIR=/fast_storage/data
+EOF
+
+# Apply configuration
+source configs/production.env</pre>
+      </div>
+    </section>
+
+    <section id="troubleshooting" class="panel">
+      <h2 class="section-title">Troubleshooting Guide</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>🔍 Worker Can't Connect</h3>
+          <p><strong>Symptoms:</strong> Worker logs show connection errors</p>
+          <ul>
+            <li>Check network connectivity: <code>ping coordinator-ip</code></li>
+            <li>Verify coordinator is running: <code>curl coordinator:8080/healthz</code></li>
+            <li>Check firewall rules for ports 8080, 8265, 10001</li>
+            <li>Ensure Tailscale is connected on both machines</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>🚫 GPU Not Detected</h3>
+          <p><strong>Symptoms:</strong> Tasks run on CPU instead of GPU</p>
+          <ul>
+            <li>Run <code>bash scripts/bs_detect.sh</code> to check GPU status</li>
+            <li>Verify NVIDIA drivers: <code>nvidia-smi</code></li>
+            <li>Test Docker GPU access: <code>docker run --gpus all nvidia/cuda:12.1-runtime-ubuntu20.04 nvidia-smi</code></li>
+            <li>Restart Docker daemon if needed</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>💾 Out of Memory Errors</h3>
+          <p><strong>Symptoms:</strong> CUDA out of memory exceptions</p>
+          <ul>
+            <li>Reduce batch sizes in your jobs</li>
+            <li>Lower <code>num_gpus</code> to allow memory sharing</li>
+            <li>Enable gradient checkpointing for models</li>
+            <li>Monitor VRAM usage in Ray dashboard</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>🐌 Jobs Not Distributing</h3>
+          <p><strong>Symptoms:</strong> All work runs on one machine</p>
+          <ul>
+            <li>Check worker registration: <code>curl coordinator:8080/workers</code></li>
+            <li>Verify Ray cluster in dashboard: <code>coordinator:8265</code></li>
+            <li>Ensure jobs use <code>ray.init(address="auto")</code></li>
+            <li>Check resource requirements match available GPUs</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Diagnostic Commands</h3>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Comprehensive System Check</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre># Full system diagnostic
+echo "=== System Check ==="
+bash scripts/bs_detect.sh
+
+echo "=== Network Check ==="
+ping -c 3 coordinator-ip
+
+echo "=== Service Status ==="
+bash scripts/bs_status.sh
+
+echo "=== Container Logs ==="
+docker logs --tail 20 backyard-worker
+docker logs --tail 20 backyard-coordinator
+
+echo "=== Ray Cluster Status ==="
+curl -s http://coordinator:8080/cluster/status | jq</pre>
+      </div>
+
+      <div class="callout warning">
+        <strong>Still Having Issues?</strong> Check the container logs first - they usually contain the specific error message you need. Use <code>docker logs -f container-name</code> to follow logs in real-time.
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p class="footer-quote">"Debug systematically. Monitor continuously. Ship reliably." — Cool Rick</p>
+      <p>Need more help? Check the <a href="index.html" style="color: var(--accent-portal);">main documentation</a> or examine the container logs for detailed error messages.</p>
+    </footer>
+  </div>
+</body>
+</html>

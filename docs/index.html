@@ -6,213 +6,661 @@
   <title>Backyard Swarm — Tangnet P2P GPU Mesh (v0.1)</title>
   <meta name="description" content="Backyard Swarm: a practical plan to harness consumer GPUs (3070/4060/5090 + Pi control) for distributed AI workloads using P2P orchestration, federated LoRA fine‑tuning, MoE/speculative inference, and embarrassingly parallel jobs." />
 
-  <!-- Minimal, clean styling (no external CSS needed) -->
+  <!-- Cool Rick aesthetic with subtle sci-fi touches -->
   <style>
     :root {
-      --bg: #0b0e14;
-      --panel: #121722;
-      --text: #e6edf3;
-      --muted: #9fb0c1;
-      --accent: #7df9ff;
-      --accent2: #ff7de9;
-      --ok: #56d364;
-      --warn: #f0883e;
-      --danger: #ff6b6b;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      /* Cool Rick palette: muted, professional, understated competence */
+      --bg-primary: #1a1d23;
+      --bg-secondary: #242932;
+      --bg-tertiary: #2f3441;
+      --text-primary: #e8eaed;
+      --text-secondary: #bdc1c6;
+      --text-muted: #9aa0a6;
+
+      /* Subtle Rick Sanchez sci-fi accents */
+      --accent-portal: #00d4aa;
+      --accent-portal-dim: #00a085;
+      --accent-interdim: #5f6fff;
+      --accent-warn: #ffa726;
+      --accent-danger: #ff6b6b;
+      --accent-success: #66bb6a;
+
+      /* Understated gradients and glows */
+      --glow-portal: rgba(0, 212, 170, 0.15);
+      --glow-interdim: rgba(95, 111, 255, 0.1);
+
+      --mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Monaco, 'Courier New', monospace;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: radial-gradient(1200px 800px at 70% -20%, rgba(0,255,255,.12), transparent 60%), var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; line-height: 1.55; }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 20px 80px; }
-    header { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: var(--sans);
+      line-height: 1.6;
+      font-size: 16px;
+      overflow-x: hidden;
+    }
+
+    /* Subtle background animation - very Cool Rick understated */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, var(--glow-portal) 0%, transparent 50%);
+      animation: drift 60s ease-in-out infinite;
+      z-index: -1;
+      opacity: 0.3;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(-30px, -30px) rotate(1deg); }
+      66% { transform: translate(30px, 30px) rotate(-1deg); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header with Cool Rick understated confidence */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--bg-tertiary);
+      position: relative;
+    }
+
+    .logo-container {
+      margin-bottom: 1.5rem;
+    }
+
     .logo {
-      width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2));
-      display:flex; align-items:center; justify-content:center; font-weight: 800; color:#0b0e14; letter-spacing: .5px; box-shadow: 0 8px 30px rgba(125,249,255,.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--accent-portal), var(--accent-interdim));
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--bg-primary);
+      letter-spacing: -1px;
+      box-shadow:
+        0 8px 32px var(--glow-portal),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      position: relative;
     }
-    h1 { margin: 0 0 4px; font-size: 28px; }
-    .tagline { color: var(--muted); margin-bottom: 24px; }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1));
+      border-radius: 18px;
+      pointer-events: none;
+    }
+
+    .title {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-portal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .status-badges {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-family: var(--mono);
+    }
+
+    .badge.pre-alpha { border-color: var(--accent-warn); color: var(--accent-warn); }
+    .badge.cuda { border-color: var(--accent-success); color: var(--accent-success); }
+
+    /* Navigation with Cool Rick efficiency */
+    .nav {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .nav-item {
+      display: block;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-primary);
+      border-color: var(--accent-portal);
+      color: var(--accent-portal);
+      box-shadow: 0 0 20px var(--glow-portal);
+      transform: translateY(-1px);
+    }
+
+    /* Content panels with subtle Rick Sanchez sci-fi touches */
     .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-      border: 1px solid rgba(125,249,255,.15);
-      border-radius: 16px; padding: 22px; margin: 18px 0;
-      box-shadow: 0 10px 30px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.02);
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow:
+        0 4px 24px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
     }
-    h2 { margin: 22px 0 10px; font-size: 22px; border-left: 6px solid var(--accent); padding-left: 10px; }
-    h3 { margin: 18px 0 6px; font-size: 18px; color: #d6e4f0; }
-    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-    code, pre { font-family: var(--mono); font-size: 13.5px; }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-portal), transparent);
+      opacity: 0.3;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      border-left: 4px solid var(--accent-portal);
+      padding-left: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent-portal), transparent);
+      opacity: 0.3;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .card {
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--glow-portal);
+      box-shadow: 0 0 20px var(--glow-portal);
+    }
+
+    .card h3 {
+      color: var(--accent-portal);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .card ul {
+      list-style: none;
+    }
+
+    .card ul li {
+      margin: 0.5rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+      color: var(--text-secondary);
+    }
+
+    .card ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-portal);
+      font-weight: bold;
+    }
+
+    /* Code blocks with Rick Sanchez lab aesthetic */
+    .code-container {
+      margin: 1.5rem 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--bg-tertiary);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-primary);
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .code-title {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--accent-portal);
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-portal);
+      color: var(--bg-primary);
+      border-color: var(--accent-portal);
+    }
+
     pre {
-      background: #0f1420; border: 1px solid rgba(125,249,255,.12); border-radius: 12px; padding: 14px 14px 18px;
-      overflow: auto; position: relative;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      padding: 1.25rem;
+      overflow-x: auto;
+      margin: 0;
     }
-    .codehead { display:flex; align-items:center; justify-content:space-between; margin-top: 14px; }
-    .btn {
-      display:inline-flex; align-items:center; gap:8px; padding: 8px 12px; border-radius: 10px; border:1px solid rgba(255,255,255,.12);
-      background: #0f1420; color: var(--text); cursor: pointer;
+
+    code {
+      font-family: var(--mono);
+      background: var(--bg-tertiary);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9em;
     }
-    .btn:hover { border-color: rgba(125,249,255,.35); box-shadow: 0 0 0 2px rgba(125,249,255,.08) inset; }
-    .toc { display:flex; flex-wrap: wrap; gap:10px; }
-    .pill { padding: 6px 10px; border-radius: 999px; background: rgba(125,249,255,.1); border:1px solid rgba(125,249,255,.2); color: var(--text); }
-    .callout { border-left: 6px solid var(--accent2); padding-left: 12px; }
-    .kbd { font-family: var(--mono); background: #0f1420; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12); }
-    .check li { margin: 8px 0; }
-    footer { margin-top: 40px; color: var(--muted); font-size: 14px; }
+
+    /* Callouts with Cool Rick authority */
+    .callout {
+      background: linear-gradient(135deg, var(--glow-interdim), transparent);
+      border: 1px solid var(--accent-interdim);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--accent-interdim);
+    }
+
+    .callout strong {
+      color: var(--accent-interdim);
+    }
+
+    /* Roadmap with Rick Sanchez timeline aesthetic */
+    .roadmap {
+      list-style: none;
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .roadmap::before {
+      content: '';
+      position: absolute;
+      left: 0.75rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent-portal), var(--accent-interdim));
+      opacity: 0.5;
+    }
+
+    .roadmap li {
+      margin: 1.5rem 0;
+      padding: 1rem 1.5rem;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-portal);
+      position: relative;
+    }
+
+    .roadmap li::before {
+      content: '';
+      position: absolute;
+      left: -2.25rem;
+      top: 1.25rem;
+      width: 12px;
+      height: 12px;
+      background: var(--accent-portal);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--glow-portal);
+    }
+
+    /* Checklist with Cool Rick efficiency */
+    .checklist {
+      list-style: none;
+    }
+
+    .checklist li {
+      margin: 0.75rem 0;
+      padding: 0.75rem;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .checklist li.complete {
+      border-left: 4px solid var(--accent-success);
+    }
+
+    .checklist li.pending {
+      border-left: 4px solid var(--accent-warn);
+    }
+
+    .check-icon {
+      font-size: 1.2rem;
+    }
+
+    .check-icon.complete { color: var(--accent-success); }
+    .check-icon.pending { color: var(--accent-warn); }
+
+    /* Footer with understated Cool Rick sign-off */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--bg-tertiary);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-quote {
+      font-style: italic;
+      color: var(--accent-portal);
+      margin-bottom: 1rem;
+      font-family: var(--mono);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .panel { padding: 1.5rem; }
+      .nav-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+      .status-badges { flex-direction: column; align-items: center; }
+    }
   </style>
 
-  <!-- Lightweight copy-to-clipboard for code blocks -->
+  <!-- Enhanced copy-to-clipboard with Cool Rick feedback -->
   <script>
     document.addEventListener('click', async (e) => {
-      const btn = e.target.closest('[data-copy]');
+      const btn = e.target.closest('.copy-btn');
       if (!btn) return;
-      const pre = btn.closest('.panel').querySelector('pre');
+
+      const container = btn.closest('.code-container');
+      const pre = container?.querySelector('pre');
       if (!pre) return;
+
       try {
-        await navigator.clipboard.writeText(pre.innerText);
-        const txt = btn.innerText;
-        btn.innerText = 'Copied ✓';
-        setTimeout(()=>btn.innerText = txt, 1200);
-      } catch {}
+        await navigator.clipboard.writeText(pre.textContent);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>✓</span> Copied';
+        btn.style.background = 'var(--accent-success)';
+        btn.style.color = 'var(--bg-primary)';
+
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 1500);
+      } catch (err) {
+        console.warn('Copy failed:', err);
+      }
     });
   </script>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">BS</div>
-      <div>
-        <h1>Backyard Swarm — Tangnet P2P GPU Mesh</h1>
-        <div class="tagline">A pragmatic blueprint to harness consumer GPUs for useful distributed AI work. Stop waiting for datacenters; conscript the suburbs.</div>
+  <div class="container">
+    <header class="header">
+      <div class="logo-container">
+        <div class="logo">BS</div>
+      </div>
+      <h1 class="title">Backyard Swarm</h1>
+      <p class="subtitle">Tangnet P2P GPU Mesh — A pragmatic blueprint to harness consumer GPUs for distributed AI work. Stop waiting for datacenters; conscript the suburbs.</p>
+      <div class="status-badges">
+        <span class="badge pre-alpha"><span>⚡</span> Pre-Alpha v0.1</span>
+        <span class="badge cuda"><span>🚀</span> NVIDIA CUDA</span>
+        <span class="badge"><span>📡</span> P2P Mesh</span>
       </div>
     </header>
 
-    <div class="panel">
-      <div class="toc">
-        <a class="pill" href="#overview">Overview</a>
-        <a class="pill" href="#architecture">Architecture</a>
-        <a class="pill" href="#algorithms">Workloads & Algorithms</a>
-        <a class="pill" href="#mvp">MVP Roadmap</a>
-        <a class="pill" href="#quickstart">Quick Start</a>
-        <a class="pill" href="#jobs">Starter Jobs</a>
-        <a class="pill" href="#observability">Observability</a>
-        <a class="pill" href="#security">Security</a>
-        <a class="pill" href="#roadmap">Next Sprints</a>
+    <nav class="nav">
+      <div class="nav-grid">
+        <a class="nav-item" href="user-guide.html" style="background: linear-gradient(135deg, var(--accent-portal), var(--accent-interdim)); color: var(--bg-primary); font-weight: 600;">📚 User Guide</a>
+        <a class="nav-item" href="#overview">Overview</a>
+        <a class="nav-item" href="#architecture">Architecture</a>
+        <a class="nav-item" href="#algorithms">Algorithms</a>
+        <a class="nav-item" href="#mvp">Roadmap</a>
+        <a class="nav-item" href="#quickstart">Quick Start</a>
+        <a class="nav-item" href="#jobs">Sample Jobs</a>
+        <a class="nav-item" href="#observability">Monitoring</a>
+        <a class="nav-item" href="#security">Security</a>
       </div>
-    </div>
+    </nav>
 
     <section id="overview" class="panel">
-      <h2>Overview — The Bet</h2>
-      <p>We won’t copy Bitcoin’s “embarrassingly parallel” hash model. Instead, we <strong>match workload to topology</strong> and <strong>change the workload</strong> where needed. A small P2P mesh of home GPUs (e.g., 3070, 4060, 5090) plus a Raspberry Pi control node can deliver tangible throughput on real AI tasks today.</p>
+      <h2 class="section-title">The Bet — Match Workload to Topology</h2>
+      <p>We won't copy Bitcoin's "embarrassingly parallel" hash model. Instead, we <strong>match workload to topology</strong> and <strong>change the workload</strong> where needed. A small P2P mesh of home GPUs (e.g., 3070, 4060, 5090) plus a Raspberry Pi control node can deliver tangible throughput on real AI tasks today.</p>
+
       <div class="grid">
-        <div class="panel">
-          <h3>What splits cleanly (Day&nbsp;1)</h3>
+        <div class="card">
+          <h3>What splits cleanly (Day 1)</h3>
           <ul>
             <li>Diffusion image/video batches</li>
-            <li>Dataset preprocessing &amp; embeddings</li>
-            <li>Evaluation suites &amp; hyperparam sweeps</li>
+            <li>Dataset preprocessing & embeddings</li>
+            <li>Evaluation suites & hyperparam sweeps</li>
+            <li>Inference serving with request batching</li>
           </ul>
         </div>
-        <div class="panel">
+        <div class="card">
           <h3>What we reshape to split (Near-term)</h3>
           <ul>
             <li><strong>Federated LoRA/QLoRA</strong> (tiny adapter deltas, not gigabytes)</li>
             <li><strong>Mixture-of-Experts (MoE)</strong> inference across peers</li>
             <li><strong>Speculative decoding farms</strong> (drafts + verifier)</li>
-            <li>Ensemble &amp; reranker pipelines</li>
+            <li>Ensemble & reranker pipelines</li>
           </ul>
         </div>
       </div>
-      <p class="callout"><strong>Why it can work:</strong> LoRA keeps training traffic small; MoE/speculative minimize WAN payloads (activations, not KV caches); asynchronous retries mask flaky peers; no global all-reduce over the internet.</p>
+
+      <div class="callout">
+        <strong>Why it works:</strong> LoRA keeps training traffic small; MoE/speculative minimize WAN payloads (activations, not KV caches); asynchronous retries mask flaky peers; no global all-reduce over the internet. <em>Physics wins, every time.</em>
+      </div>
     </section>
 
     <section id="architecture" class="panel">
-      <h2>High-level Architecture</h2>
+      <h2 class="section-title">System Architecture</h2>
       <div class="grid">
-        <div class="panel">
-          <h3>Coordinator (control plane)</h3>
+        <div class="card">
+          <h3>Coordinator (Control Plane)</h3>
           <ul>
-            <li>Peer registry, health, NAT hints</li>
-            <li>Task DAGs &amp; lightweight scheduling</li>
-            <li>Artifacts via object storage (MinIO/S3)</li>
+            <li>Peer registry, health monitoring, NAT traversal hints</li>
+            <li>Task DAGs & heterogeneity-aware scheduling</li>
+            <li>Artifact management via object storage (MinIO/S3)</li>
+            <li>Credit ledger & reputation tracking</li>
           </ul>
         </div>
-        <div class="panel">
+        <div class="card">
           <h3>Worker Agent</h3>
           <ul>
-            <li>Dockerized PyTorch/CUDA tasks</li>
-            <li>Resource advert: FLOPs/VRAM/bandwidth</li>
-            <li>Checkpointing, retries, sandboxing</li>
+            <li>Dockerized PyTorch/CUDA task execution</li>
+            <li>Resource advertisement: FLOPs/VRAM/bandwidth</li>
+            <li>Checkpoint/resume, retries, sandboxed execution</li>
+            <li>Telemetry & performance monitoring</li>
           </ul>
         </div>
-        <div class="panel">
+        <div class="card">
           <h3>Overlay Network</h3>
           <ul>
-            <li>Tailscale/WireGuard for stable IPs</li>
-            <li>P2P discovery (libp2p/QUIC) later</li>
-            <li>Encrypted, signed manifests</li>
+            <li>Tailscale/WireGuard for stable mesh IPs</li>
+            <li>P2P discovery (libp2p/QUIC) for public networks</li>
+            <li>End-to-end encryption, signed task manifests</li>
+            <li>NAT traversal & connection quality monitoring</li>
           </ul>
         </div>
-        <div class="panel">
-          <h3>Scheduling &amp; Accounting</h3>
+        <div class="card">
+          <h3>Scheduling & Economics</h3>
           <ul>
-            <li>Heterogeneity-aware packing</li>
-            <li>Speculative backups for stragglers</li>
-            <li>Reputation &amp; audits; credits per task</li>
+            <li>Heterogeneity-aware task packing</li>
+            <li>Speculative execution for straggler mitigation</li>
+            <li>Reputation system & fraud detection</li>
+            <li>Resource credits & optional external payouts</li>
           </ul>
         </div>
       </div>
     </section>
 
     <section id="algorithms" class="panel">
-      <h2>Workloads &amp; Algorithms</h2>
-      <h3>A) Federated/Gossip LoRA Fine-tuning</h3>
-      <ul>
-        <li>Clients train LoRA locally; send compressed adapter deltas</li>
-        <li><span class="kbd">FedAvg</span> baseline; gossip-SGD for full decentralization</li>
-        <li>Quantized gradients (8‑bit), error feedback, adaptive weighting</li>
-      </ul>
-      <h3>B) MoE Inference over Peers</h3>
-      <ul>
-        <li>Router selects top‑k experts; each hosted on different peers</li>
-        <li>Transmit activations only; keep experts warm; timeout/backup</li>
-      </ul>
-      <h3>C) Speculative Decoding Farm</h3>
-      <ul>
-        <li>Many small “draft” models propose tokens; one larger verifier confirms</li>
-        <li>Great for throughput across a mesh; batch requests at the router</li>
-      </ul>
-      <h3>D) Embarrassingly Parallel (Now)</h3>
-      <ul>
-        <li>Diffusion renders, embeddings, data cleaning, eval runs</li>
-      </ul>
+      <h2 class="section-title">Workloads & Algorithms</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>A) Federated/Gossip LoRA Fine-tuning</h3>
+          <ul>
+            <li>Clients train LoRA locally; exchange compressed adapter deltas</li>
+            <li><code>FedAvg</code> baseline; gossip-SGD for full decentralization</li>
+            <li>Quantized gradients (8-bit), error feedback, adaptive weighting</li>
+            <li>Privacy-preserving aggregation with differential privacy</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>B) MoE Inference over Peers</h3>
+          <ul>
+            <li>Router selects top-k experts; each hosted on different peers</li>
+            <li>Transmit activations only; keep experts warm in memory</li>
+            <li>Timeout handling & backup expert selection</li>
+            <li>Load balancing across heterogeneous hardware</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>C) Speculative Decoding Farm</h3>
+          <ul>
+            <li>Many small "draft" models propose token sequences</li>
+            <li>Single larger verifier model accepts/rejects proposals</li>
+            <li>Excellent throughput scaling across mesh topology</li>
+            <li>Batch processing at router for efficiency</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>D) Embarrassingly Parallel (Available Now)</h3>
+          <ul>
+            <li>Stable Diffusion batch rendering</li>
+            <li>Text/image embedding computation</li>
+            <li>Dataset preprocessing & cleaning pipelines</li>
+            <li>Model evaluation & hyperparameter sweeps</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <section id="mvp" class="panel">
-      <h2>MVP Roadmap</h2>
-      <ol>
-        <li><strong>Phase 0:</strong> Local cluster via Docker + Ray; Pi (or any node) as coordinator; run embeddings &amp; SD batches; basic credit counter.</li>
-        <li><strong>Phase 1:</strong> Federated LoRA adapters (merge/average rounds, resume, metrics).</li>
-        <li><strong>Phase 2:</strong> Distributed inference — MoE experts + speculative decoding.</li>
-        <li><strong>Phase 3:</strong> P2P discovery (libp2p), optimistic verification, reputation, payouts later.</li>
+      <h2 class="section-title">Development Roadmap</h2>
+      <ol class="roadmap">
+        <li><strong>Phase 0 (Current):</strong> Local cluster via Docker + Ray; Pi coordinator; embeddings & SD batches; basic credit ledger</li>
+        <li><strong>Phase 1:</strong> Federated LoRA training — adapter exchange, FedAvg aggregation, checkpoint resume, metrics dashboard</li>
+        <li><strong>Phase 2:</strong> Distributed inference — MoE expert routing + speculative decoding with draft/verifier architecture</li>
+        <li><strong>Phase 3:</strong> P2P discovery (libp2p), optimistic verification, reputation scoring, optional external payouts</li>
       </ol>
     </section>
 
     <section id="quickstart" class="panel">
-      <h2>Quick Start (Tonight)</h2>
-      <h3>0) Form the mesh (avoid WAN pain)</h3>
-      <p>Install <strong>Tailscale</strong> (or WireGuard) on each machine (3070 desktop, 4060 laptop, Pi, and remote 5090). Use the Tailnet IPs for all configs.</p>
+      <h2 class="section-title">Quick Start — Tonight's Mission</h2>
 
-      <div class="codehead">
-        <strong>ops/compose-coordinator.yml</strong>
-        <button class="btn" data-copy>Copy</button>
-      </div>
-      <pre>services:
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">Step 0: Form the Mesh</h3>
+      <p>Install <strong>Tailscale</strong> (or WireGuard) on each machine (3070 desktop, 4060 laptop, Pi, remote 5090). Use Tailnet IPs for all configurations to avoid WAN routing pain.</p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">ops/compose-coordinator.yml</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>services:
   coordinator:
     image: ghcr.io/tangnet/backyard-coordinator:0.1
     container_name: backyard-coordinator
     ports:
-      - "8080:8080"   # REST
+      - "8080:8080"   # REST API
       - "8265:8265"   # Ray dashboard (if using Ray)
     environment:
       - STORAGE_URL=http://minio:9000
@@ -220,6 +668,7 @@
       - STORAGE_ACCESS=minio
       - STORAGE_SECRET=minio123
     networks: [swarm]
+
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
@@ -230,42 +679,56 @@
     volumes:
       - ./minio:/data
     networks: [swarm]
+
 networks:
   swarm: {}</pre>
-
-      <div class="codehead">
-        <strong>Bring up the coordinator</strong>
-        <button class="btn" data-copy>Copy</button>
       </div>
-      <pre>docker compose -f ops/compose-coordinator.yml up -d</pre>
 
-      <div class="codehead">
-        <strong>Worker on each GPU box</strong>
-        <button class="btn" data-copy>Copy</button>
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Launch Coordinator</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>docker compose -f ops/compose-coordinator.yml up -d</pre>
       </div>
-      <pre>docker run --gpus all -d --restart unless-stopped --name backyard-worker \
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Worker on Each GPU Box</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>docker run --gpus all -d --restart unless-stopped --name backyard-worker \
   -e COORD_ADDR=http://&lt;COORD_TAILSCALE_IP&gt;:8080 \
   -e NODE_NAME=$(hostname) \
   -v /mnt/models:/models -v /mnt/data:/data \
   ghcr.io/tangnet/backyard-worker:0.1</pre>
+      </div>
 
-      <div class="panel">
-        <strong>Perf env hints (optional):</strong>
-        <pre>TORCH_CUDA_ARCH_LIST="8.6;8.9"    # 3070=8.6, 4060=8.9, 5090≈9.x OK
-PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128,garbage_collection_threshold:0.9</pre>
+      <div class="callout">
+        <strong>Performance Tuning (Optional):</strong><br>
+        <code>TORCH_CUDA_ARCH_LIST="8.6;8.9"</code> # 3070=8.6, 4060=8.9, 5090≈9.x<br>
+        <code>PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128,garbage_collection_threshold:0.9</code>
       </div>
     </section>
 
     <section id="jobs" class="panel">
-      <h2>Starter Jobs</h2>
+      <h2 class="section-title">Sample Jobs — Prove the Concept</h2>
 
-      <h3>A) Embeddings Farm</h3>
-      <p>Shards a text file, computes embeddings in parallel using small GPU slices, writes a JSON with vectors.</p>
-      <div class="codehead">
-        <strong>jobs/embeddings.py</strong>
-        <button class="btn" data-copy>Copy</button>
-      </div>
-      <pre>import os, math, json, ray
+      <h3 style="color: var(--accent-portal); margin: 1.5rem 0 1rem;">A) Embeddings Farm</h3>
+      <p>Shards a text file, computes embeddings in parallel using fractional GPU allocation, outputs consolidated JSON with vectors.</p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">jobs/embeddings.py</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>import os, math, json, ray
 from pathlib import Path
 from typing import List
 ray.init(address="auto")
@@ -297,20 +760,29 @@ if __name__ == "__main__":
     vecs = [v for block in results for v in block]
     Path(args.out).write_text(json.dumps({"model": MODEL_NAME, "vectors": vecs}), encoding="utf-8")
     print(f"Embedded {len(lines)} lines → {args.out}")</pre>
-
-      <div class="codehead">
-        <strong>Run</strong>
-        <button class="btn" data-copy>Copy</button>
       </div>
-      <pre>python jobs/embeddings.py --input /data/corpus.txt --shards 64 --out /data/corpus.embeddings.json</pre>
 
-      <h3>B) Image Batch (Stable Diffusion)</h3>
-      <p>Throughput demo using diffusers (SDXL Turbo default). Mount weights under <span class="kbd">/models</span> if using local models.</p>
-      <div class="codehead">
-        <strong>jobs/sd_batch.py</strong>
-        <button class="btn" data-copy>Copy</button>
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Execute Embeddings Job</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>python jobs/embeddings.py --input /data/corpus.txt --shards 64 --out /data/corpus.embeddings.json</pre>
       </div>
-      <pre>import os, ray, torch, json
+
+      <h3 style="color: var(--accent-portal); margin: 2rem 0 1rem;">B) Stable Diffusion Batch</h3>
+      <p>Throughput demonstration using diffusers (SDXL Turbo default). Mount model weights under <code>/models</code> for local inference.</p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">jobs/sd_batch.py</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>import os, ray, torch, json
 from pathlib import Path
 ray.init(address="auto")
 
@@ -333,47 +805,108 @@ if __name__ == "__main__":
     prompts = [l.strip() for l in Path(args.prompts).read_text(encoding="utf-8").splitlines() if l.strip()]
     futures = [render.remote(p, args.out, i*13+7) for i,p in enumerate(prompts)]
     print(json.dumps(ray.get(futures), indent=2))</pre>
-
-      <div class="codehead">
-        <strong>Run</strong>
-        <button class="btn" data-copy>Copy</button>
       </div>
-      <pre>python jobs/sd_batch.py --prompts /data/prompts.txt --out /data/outs</pre>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title">Execute Batch Rendering</span>
+          <button class="copy-btn">
+            <span>📋</span> Copy
+          </button>
+        </div>
+        <pre>python jobs/sd_batch.py --prompts /data/prompts.txt --out /data/outputs</pre>
+      </div>
     </section>
 
     <section id="observability" class="panel">
-      <h2>Observability</h2>
-      <ul>
-        <li>Prometheus + Grafana on the Pi or 4060: GPU util/VRAM, task latency, retries</li>
-        <li>Consistency checks for embeddings (cosine drift alarms)</li>
-        <li>Random re-render seed audits for image tasks</li>
-      </ul>
+      <h2 class="section-title">Observability & Monitoring</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>System Metrics</h3>
+          <ul>
+            <li>Prometheus + Grafana on coordinator node</li>
+            <li>GPU utilization, VRAM usage, temperature monitoring</li>
+            <li>Task latency, retry rates, throughput metrics</li>
+            <li>Network bandwidth & connection quality</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Quality Assurance</h3>
+          <ul>
+            <li>Consistency checks for embeddings (cosine drift alarms)</li>
+            <li>Random re-render seed audits for image tasks</li>
+            <li>Model output validation & sanity checks</li>
+            <li>Automated anomaly detection</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <section id="security" class="panel">
-      <h2>Security &amp; Safety</h2>
-      <ul>
-        <li>All tasks run in containers with read‑only root; bind only <span class="kbd">/data</span> and <span class="kbd">/models</span></li>
-        <li>Signed task specs; verify image digests</li>
-        <li>Tailnet‑only access in v0.1; public P2P later</li>
-      </ul>
+      <h2 class="section-title">Security & Safety Model</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Container Security</h3>
+          <ul>
+            <li>Read-only root filesystem</li>
+            <li>Bind mounts limited to <code>/data</code> and <code>/models</code></li>
+            <li>No privileged escalation</li>
+            <li>Resource limits & CPU/memory quotas</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Network Security</h3>
+          <ul>
+            <li>Tailnet-only access in v0.1 (no public ingress)</li>
+            <li>Signed task specifications</li>
+            <li>Image digest verification</li>
+            <li>Encrypted peer-to-peer communication</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>Trust Model:</strong> Current design assumes trusted network participants. Future versions will add cryptographic verification, reputation systems, and sandboxed execution for untrusted workloads.
+      </div>
     </section>
 
     <section id="roadmap" class="panel">
-      <h2>Next 72h — What “Done” Looks Like</h2>
-      <ul class="check">
-        <li>✅ Tailnet up; all nodes reach <span class="kbd">http://&lt;coord-ip&gt;:8080/healthz</span></li>
-        <li>✅ Embeddings job runs across 3070+4060 concurrently; speedup vs. single GPU</li>
-        <li>✅ SD batch saturates the 5090 (verifiable 90%+ utilization)</li>
-        <li>⏭ Add credit ledger (walltime × VRAM)</li>
-        <li>⏭ Implement LoRA FedAvg loop (adapters only)</li>
-        <li>⏭ Prototype speculative decoding: 8B drafts + larger verifier</li>
+      <h2 class="section-title">Next 72h — Definition of Done</h2>
+      <ul class="checklist">
+        <li class="complete">
+          <span class="check-icon complete">✅</span>
+          Tailnet operational; all nodes reach <code>http://&lt;coord-ip&gt;:8080/healthz</code>
+        </li>
+        <li class="complete">
+          <span class="check-icon complete">✅</span>
+          Embeddings job scales across 3070+4060 concurrently; measurable speedup vs single GPU
+        </li>
+        <li class="complete">
+          <span class="check-icon complete">✅</span>
+          SD batch fully saturates 5090 (verifiable 90%+ utilization via <code>nvidia-smi</code>)
+        </li>
+        <li class="pending">
+          <span class="check-icon pending">⏭️</span>
+          Credit ledger implementation (walltime × VRAM consumption)
+        </li>
+        <li class="pending">
+          <span class="check-icon pending">⏭️</span>
+          LoRA FedAvg training loop (adapter-only parameter exchange)
+        </li>
+        <li class="pending">
+          <span class="check-icon pending">⏭️</span>
+          Speculative decoding prototype: 8B draft models + larger verifier
+        </li>
       </ul>
-      <p class="callout"><strong>HK‑47 Note:</strong> Observation: decentralized swarms avoid central choke points. Recommendation: deploy more meatbag GPUs.</p>
+
+      <div class="callout">
+        <strong>Rick's Technical Assessment:</strong> <em>"Listen, Morty—decentralized swarms avoid chokepoints because, uh, because centralized infrastructure is for universes that didn't figure out basic topology, Morty. More GPUs means more parallel universes of computation. It's science."</em>
+      </div>
     </section>
 
-    <footer>
-      <p>© 2025 Tangnet — Backyard Swarm v0.1 • Bring‑your‑own‑GPU, bring‑your‑own‑chaos. Crafted for 3070/4060/5090 + Pi control. MIT-ish vibes; license TBD.</p>
+    <footer class="footer">
+      <p class="footer-quote">"Steady tempo. Clean wiring. We ship." — Cool Rick</p>
+      <p>© 2025 Tangnet — Backyard Swarm v0.1 • Bring-your-own-GPU, bring-your-own-chaos.<br>
+      Crafted for 3070/4060/5090 + Pi coordination. MIT-ish vibes; license TBD.</p>
     </footer>
   </div>
 </body>
