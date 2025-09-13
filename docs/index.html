@@ -108,6 +108,48 @@
       position: relative;
     }
 
+    /* 80's Terminal ASCII Art Title */
+    .ascii-title {
+      margin-bottom: 2rem;
+    }
+
+    .ascii-art {
+      font-family: var(--mono);
+      font-size: clamp(8px, 1.1vw, 11px);
+      line-height: 1.1;
+      color: var(--text-primary);
+      text-shadow: 0 0 10px currentColor;
+      background: var(--bg-secondary);
+      border: 2px solid var(--accent-portal);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0;
+      box-shadow:
+        0 0 20px var(--glow-portal),
+        inset 0 0 20px rgba(0, 255, 65, 0.1);
+      position: relative;
+      overflow-x: auto;
+    }
+
+    /* Terminal-style border glow animation */
+    .ascii-art::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--accent-portal), transparent, var(--accent-portal));
+      border-radius: 10px;
+      z-index: -1;
+      animation: border-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes border-pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
     .logo-container {
       margin-bottom: 1.5rem;
     }
@@ -318,13 +360,55 @@
       font-weight: bold;
     }
 
-    /* Code blocks with Rick Sanchez lab aesthetic */
+    /* Code blocks with Rick Sanchez lab aesthetic + stainless steel backing */
     .code-container {
       margin: 1.5rem 0;
       border-radius: 12px;
       overflow: hidden;
-      border: 1px solid var(--bg-tertiary);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      border: 2px solid #444;
+      box-shadow:
+        0 4px 16px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 0 30px rgba(0, 255, 65, 0.1);
+      position: relative;
+    }
+
+    /* Stainless steel back plate effect */
+    .code-container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg,
+        #c0c0c0 0%,
+        #e8e8e8 25%,
+        #f0f0f0 50%,
+        #e8e8e8 75%,
+        #c0c0c0 100%
+      );
+      border-radius: 14px;
+      z-index: -1;
+    }
+
+    /* Brushed steel texture overlay */
+    .code-container::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background:
+        repeating-linear-gradient(90deg,
+          transparent 0px,
+          rgba(255,255,255,0.1) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      border-radius: 14px;
+      z-index: -1;
     }
 
     .code-header {
@@ -334,6 +418,8 @@
       background: var(--bg-primary);
       padding: 0.75rem 1.25rem;
       border-bottom: 1px solid var(--bg-tertiary);
+      position: relative;
+      z-index: 1;
     }
 
     .code-title {
@@ -372,6 +458,8 @@
       padding: 1.25rem;
       overflow-x: auto;
       margin: 0;
+      position: relative;
+      z-index: 1;
     }
 
     code {
@@ -524,11 +612,26 @@
 <body>
   <div class="container">
     <header class="header">
-      <div class="logo-container">
-        <div class="logo">BS</div>
+      <div class="ascii-title">
+        <pre class="ascii-art">
+╔═══════════════════════════════════════════════════════════════════════╗
+║  ██████   █████   ██████ ██   ██ ██    ██  █████  ██████  ██████       ║
+║  ██   ██ ██   ██ ██      ██  ██   ██  ██  ██   ██ ██   ██ ██   ██      ║
+║  ██████  ███████ ██      █████     ████   ███████ ██████  ██   ██      ║
+║  ██   ██ ██   ██ ██      ██  ██     ██    ██   ██ ██   ██ ██   ██      ║
+║  ██████  ██   ██  ██████ ██   ██    ██    ██   ██ ██   ██ ██████       ║
+║                                                                        ║
+║   ███████ ██     ██  █████  ██████  ███    ███                        ║
+║   ██      ██     ██ ██   ██ ██   ██ ████  ████                        ║
+║   ███████ ██  █  ██ ███████ ██████  ██ ████ ██                        ║
+║        ██ ██ ███ ██ ██   ██ ██   ██ ██  ██  ██                        ║
+║   ███████  ███ ███  ██   ██ ██   ██ ██      ██                        ║
+║                                                                        ║
+║                         >> TANGNET P2P GPU MESH <<                    ║
+╚═══════════════════════════════════════════════════════════════════════╝
+</pre>
       </div>
-      <h1 class="title">Backyard Swarm</h1>
-      <p class="subtitle">TANGNET P2P GPU MESH — hack the suburbs into a distributed AI powerhouse. No datacenters, no middlemen, just raw silicon and cleverness.</p>
+      <p class="subtitle">hack the suburbs into a distributed AI powerhouse. No datacenters, no middlemen, just raw silicon and cleverness.</p>
       <div class="status-badges">
         <span class="badge pre-alpha"><span>⚡</span> Pre-Alpha v0.1</span>
         <span class="badge cuda"><span>🚀</span> NVIDIA CUDA</span>
