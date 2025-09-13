@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backyard Swarm — Tangnet P2P GPU Mesh (v0.1)</title>
+  <meta name="description" content="Backyard Swarm: a practical plan to harness consumer GPUs (3070/4060/5090 + Pi control) for distributed AI workloads using P2P orchestration, federated LoRA fine‑tuning, MoE/speculative inference, and embarrassingly parallel jobs." />
+
+  <!-- Minimal, clean styling (no external CSS needed) -->
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --panel: #121722;
+      --text: #e6edf3;
+      --muted: #9fb0c1;
+      --accent: #7df9ff;
+      --accent2: #ff7de9;
+      --ok: #56d364;
+      --warn: #f0883e;
+      --danger: #ff6b6b;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(1200px 800px at 70% -20%, rgba(0,255,255,.12), transparent 60%), var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; line-height: 1.55; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 20px 80px; }
+    header { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+    .logo {
+      width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display:flex; align-items:center; justify-content:center; font-weight: 800; color:#0b0e14; letter-spacing: .5px; box-shadow: 0 8px 30px rgba(125,249,255,.2);
+    }
+    h1 { margin: 0 0 4px; font-size: 28px; }
+    .tagline { color: var(--muted); margin-bottom: 24px; }
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid rgba(125,249,255,.15);
+      border-radius: 16px; padding: 22px; margin: 18px 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.02);
+    }
+    h2 { margin: 22px 0 10px; font-size: 22px; border-left: 6px solid var(--accent); padding-left: 10px; }
+    h3 { margin: 18px 0 6px; font-size: 18px; color: #d6e4f0; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    code, pre { font-family: var(--mono); font-size: 13.5px; }
+    pre {
+      background: #0f1420; border: 1px solid rgba(125,249,255,.12); border-radius: 12px; padding: 14px 14px 18px;
+      overflow: auto; position: relative;
+    }
+    .codehead { display:flex; align-items:center; justify-content:space-between; margin-top: 14px; }
+    .btn {
+      display:inline-flex; align-items:center; gap:8px; padding: 8px 12px; border-radius: 10px; border:1px solid rgba(255,255,255,.12);
+      background: #0f1420; color: var(--text); cursor: pointer;
+    }
+    .btn:hover { border-color: rgba(125,249,255,.35); box-shadow: 0 0 0 2px rgba(125,249,255,.08) inset; }
+    .toc { display:flex; flex-wrap: wrap; gap:10px; }
+    .pill { padding: 6px 10px; border-radius: 999px; background: rgba(125,249,255,.1); border:1px solid rgba(125,249,255,.2); color: var(--text); }
+    .callout { border-left: 6px solid var(--accent2); padding-left: 12px; }
+    .kbd { font-family: var(--mono); background: #0f1420; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12); }
+    .check li { margin: 8px 0; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 14px; }
+  </style>
+
+  <!-- Lightweight copy-to-clipboard for code blocks -->
+  <script>
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-copy]');
+      if (!btn) return;
+      const pre = btn.closest('.panel').querySelector('pre');
+      if (!pre) return;
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        const txt = btn.innerText;
+        btn.innerText = 'Copied ✓';
+        setTimeout(()=>btn.innerText = txt, 1200);
+      } catch {}
+    });
+  </script>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">BS</div>
+      <div>
+        <h1>Backyard Swarm — Tangnet P2P GPU Mesh</h1>
+        <div class="tagline">A pragmatic blueprint to harness consumer GPUs for useful distributed AI work. Stop waiting for datacenters; conscript the suburbs.</div>
+      </div>
+    </header>
+
+    <div class="panel">
+      <div class="toc">
+        <a class="pill" href="#overview">Overview</a>
+        <a class="pill" href="#architecture">Architecture</a>
+        <a class="pill" href="#algorithms">Workloads & Algorithms</a>
+        <a class="pill" href="#mvp">MVP Roadmap</a>
+        <a class="pill" href="#quickstart">Quick Start</a>
+        <a class="pill" href="#jobs">Starter Jobs</a>
+        <a class="pill" href="#observability">Observability</a>
+        <a class="pill" href="#security">Security</a>
+        <a class="pill" href="#roadmap">Next Sprints</a>
+      </div>
+    </div>
+
+    <section id="overview" class="panel">
+      <h2>Overview — The Bet</h2>
+      <p>We won’t copy Bitcoin’s “embarrassingly parallel” hash model. Instead, we <strong>match workload to topology</strong> and <strong>change the workload</strong> where needed. A small P2P mesh of home GPUs (e.g., 3070, 4060, 5090) plus a Raspberry Pi control node can deliver tangible throughput on real AI tasks today.</p>
+      <div class="grid">
+        <div class="panel">
+          <h3>What splits cleanly (Day&nbsp;1)</h3>
+          <ul>
+            <li>Diffusion image/video batches</li>
+            <li>Dataset preprocessing &amp; embeddings</li>
+            <li>Evaluation suites &amp; hyperparam sweeps</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>What we reshape to split (Near-term)</h3>
+          <ul>
+            <li><strong>Federated LoRA/QLoRA</strong> (tiny adapter deltas, not gigabytes)</li>
+            <li><strong>Mixture-of-Experts (MoE)</strong> inference across peers</li>
+            <li><strong>Speculative decoding farms</strong> (drafts + verifier)</li>
+            <li>Ensemble &amp; reranker pipelines</li>
+          </ul>
+        </div>
+      </div>
+      <p class="callout"><strong>Why it can work:</strong> LoRA keeps training traffic small; MoE/speculative minimize WAN payloads (activations, not KV caches); asynchronous retries mask flaky peers; no global all-reduce over the internet.</p>
+    </section>
+
+    <section id="architecture" class="panel">
+      <h2>High-level Architecture</h2>
+      <div class="grid">
+        <div class="panel">
+          <h3>Coordinator (control plane)</h3>
+          <ul>
+            <li>Peer registry, health, NAT hints</li>
+            <li>Task DAGs &amp; lightweight scheduling</li>
+            <li>Artifacts via object storage (MinIO/S3)</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Worker Agent</h3>
+          <ul>
+            <li>Dockerized PyTorch/CUDA tasks</li>
+            <li>Resource advert: FLOPs/VRAM/bandwidth</li>
+            <li>Checkpointing, retries, sandboxing</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Overlay Network</h3>
+          <ul>
+            <li>Tailscale/WireGuard for stable IPs</li>
+            <li>P2P discovery (libp2p/QUIC) later</li>
+            <li>Encrypted, signed manifests</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Scheduling &amp; Accounting</h3>
+          <ul>
+            <li>Heterogeneity-aware packing</li>
+            <li>Speculative backups for stragglers</li>
+            <li>Reputation &amp; audits; credits per task</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="algorithms" class="panel">
+      <h2>Workloads &amp; Algorithms</h2>
+      <h3>A) Federated/Gossip LoRA Fine-tuning</h3>
+      <ul>
+        <li>Clients train LoRA locally; send compressed adapter deltas</li>
+        <li><span class="kbd">FedAvg</span> baseline; gossip-SGD for full decentralization</li>
+        <li>Quantized gradients (8‑bit), error feedback, adaptive weighting</li>
+      </ul>
+      <h3>B) MoE Inference over Peers</h3>
+      <ul>
+        <li>Router selects top‑k experts; each hosted on different peers</li>
+        <li>Transmit activations only; keep experts warm; timeout/backup</li>
+      </ul>
+      <h3>C) Speculative Decoding Farm</h3>
+      <ul>
+        <li>Many small “draft” models propose tokens; one larger verifier confirms</li>
+        <li>Great for throughput across a mesh; batch requests at the router</li>
+      </ul>
+      <h3>D) Embarrassingly Parallel (Now)</h3>
+      <ul>
+        <li>Diffusion renders, embeddings, data cleaning, eval runs</li>
+      </ul>
+    </section>
+
+    <section id="mvp" class="panel">
+      <h2>MVP Roadmap</h2>
+      <ol>
+        <li><strong>Phase 0:</strong> Local cluster via Docker + Ray; Pi (or any node) as coordinator; run embeddings &amp; SD batches; basic credit counter.</li>
+        <li><strong>Phase 1:</strong> Federated LoRA adapters (merge/average rounds, resume, metrics).</li>
+        <li><strong>Phase 2:</strong> Distributed inference — MoE experts + speculative decoding.</li>
+        <li><strong>Phase 3:</strong> P2P discovery (libp2p), optimistic verification, reputation, payouts later.</li>
+      </ol>
+    </section>
+
+    <section id="quickstart" class="panel">
+      <h2>Quick Start (Tonight)</h2>
+      <h3>0) Form the mesh (avoid WAN pain)</h3>
+      <p>Install <strong>Tailscale</strong> (or WireGuard) on each machine (3070 desktop, 4060 laptop, Pi, and remote 5090). Use the Tailnet IPs for all configs.</p>
+
+      <div class="codehead">
+        <strong>ops/compose-coordinator.yml</strong>
+        <button class="btn" data-copy>Copy</button>
+      </div>
+      <pre>services:
+  coordinator:
+    image: ghcr.io/tangnet/backyard-coordinator:0.1
+    container_name: backyard-coordinator
+    ports:
+      - "8080:8080"   # REST
+      - "8265:8265"   # Ray dashboard (if using Ray)
+    environment:
+      - STORAGE_URL=http://minio:9000
+      - STORAGE_BUCKET=backyard
+      - STORAGE_ACCESS=minio
+      - STORAGE_SECRET=minio123
+    networks: [swarm]
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports: ["9000:9000","9001:9001"]
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    volumes:
+      - ./minio:/data
+    networks: [swarm]
+networks:
+  swarm: {}</pre>
+
+      <div class="codehead">
+        <strong>Bring up the coordinator</strong>
+        <button class="btn" data-copy>Copy</button>
+      </div>
+      <pre>docker compose -f ops/compose-coordinator.yml up -d</pre>
+
+      <div class="codehead">
+        <strong>Worker on each GPU box</strong>
+        <button class="btn" data-copy>Copy</button>
+      </div>
+      <pre>docker run --gpus all -d --restart unless-stopped --name backyard-worker \
+  -e COORD_ADDR=http://&lt;COORD_TAILSCALE_IP&gt;:8080 \
+  -e NODE_NAME=$(hostname) \
+  -v /mnt/models:/models -v /mnt/data:/data \
+  ghcr.io/tangnet/backyard-worker:0.1</pre>
+
+      <div class="panel">
+        <strong>Perf env hints (optional):</strong>
+        <pre>TORCH_CUDA_ARCH_LIST="8.6;8.9"    # 3070=8.6, 4060=8.9, 5090≈9.x OK
+PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128,garbage_collection_threshold:0.9</pre>
+      </div>
+    </section>
+
+    <section id="jobs" class="panel">
+      <h2>Starter Jobs</h2>
+
+      <h3>A) Embeddings Farm</h3>
+      <p>Shards a text file, computes embeddings in parallel using small GPU slices, writes a JSON with vectors.</p>
+      <div class="codehead">
+        <strong>jobs/embeddings.py</strong>
+        <button class="btn" data-copy>Copy</button>
+      </div>
+      <pre>import os, math, json, ray
+from pathlib import Path
+from typing import List
+ray.init(address="auto")
+
+MODEL_NAME = os.getenv("EMB_MODEL","sentence-transformers/all-MiniLM-L6-v2")
+
+@ray.remote(num_gpus=0.2)
+def embed_shard(lines: List[str]) -> List[List[float]]:
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer(MODEL_NAME)
+    return model.encode(lines, convert_to_numpy=True).tolist()
+
+def chunk(lst, n):
+    k = math.ceil(len(lst)/n)
+    for i in range(0, len(lst), k):
+        yield lst[i:i+k]
+
+if __name__ == "__main__":
+    import argparse; p=argparse.ArgumentParser()
+    p.add_argument("--input", required=True)
+    p.add_argument("--shards", type=int, default=32)
+    p.add_argument("--out", required=True)
+    args=p.parse_args()
+
+    lines = [l.strip() for l in Path(args.input).read_text(encoding="utf-8").splitlines() if l.strip()]
+    shards = list(chunk(lines, args.shards))
+    futures = [embed_shard.remote(s) for s in shards]
+    results = ray.get(futures)
+    vecs = [v for block in results for v in block]
+    Path(args.out).write_text(json.dumps({"model": MODEL_NAME, "vectors": vecs}), encoding="utf-8")
+    print(f"Embedded {len(lines)} lines → {args.out}")</pre>
+
+      <div class="codehead">
+        <strong>Run</strong>
+        <button class="btn" data-copy>Copy</button>
+      </div>
+      <pre>python jobs/embeddings.py --input /data/corpus.txt --shards 64 --out /data/corpus.embeddings.json</pre>
+
+      <h3>B) Image Batch (Stable Diffusion)</h3>
+      <p>Throughput demo using diffusers (SDXL Turbo default). Mount weights under <span class="kbd">/models</span> if using local models.</p>
+      <div class="codehead">
+        <strong>jobs/sd_batch.py</strong>
+        <button class="btn" data-copy>Copy</button>
+      </div>
+      <pre>import os, ray, torch, json
+from pathlib import Path
+ray.init(address="auto")
+
+@ray.remote(num_gpus=1)
+def render(prompt, outdir, seed):
+    from diffusers import StableDiffusionPipeline
+    model = os.getenv("SD_MODEL","stabilityai/sdxl-turbo")
+    pipe = StableDiffusionPipeline.from_pretrained(model, torch_dtype=torch.float16, use_safetensors=True).to("cuda")
+    g = torch.Generator(device="cuda").manual_seed(seed)
+    img = pipe(prompt, guidance_scale=0.0, num_inference_steps=4, generator=g).images[0]
+    p = Path(outdir) / (str(abs(hash(prompt)))[:10] + ".png")
+    p.parent.mkdir(parents=True, exist_ok=True)
+    img.save(p)
+    return str(p)
+
+if __name__ == "__main__":
+    import argparse; a=argparse.ArgumentParser()
+    a.add_argument("--prompts", required=True); a.add_argument("--out", required=True)
+    args=a.parse_args()
+    prompts = [l.strip() for l in Path(args.prompts).read_text(encoding="utf-8").splitlines() if l.strip()]
+    futures = [render.remote(p, args.out, i*13+7) for i,p in enumerate(prompts)]
+    print(json.dumps(ray.get(futures), indent=2))</pre>
+
+      <div class="codehead">
+        <strong>Run</strong>
+        <button class="btn" data-copy>Copy</button>
+      </div>
+      <pre>python jobs/sd_batch.py --prompts /data/prompts.txt --out /data/outs</pre>
+    </section>
+
+    <section id="observability" class="panel">
+      <h2>Observability</h2>
+      <ul>
+        <li>Prometheus + Grafana on the Pi or 4060: GPU util/VRAM, task latency, retries</li>
+        <li>Consistency checks for embeddings (cosine drift alarms)</li>
+        <li>Random re-render seed audits for image tasks</li>
+      </ul>
+    </section>
+
+    <section id="security" class="panel">
+      <h2>Security &amp; Safety</h2>
+      <ul>
+        <li>All tasks run in containers with read‑only root; bind only <span class="kbd">/data</span> and <span class="kbd">/models</span></li>
+        <li>Signed task specs; verify image digests</li>
+        <li>Tailnet‑only access in v0.1; public P2P later</li>
+      </ul>
+    </section>
+
+    <section id="roadmap" class="panel">
+      <h2>Next 72h — What “Done” Looks Like</h2>
+      <ul class="check">
+        <li>✅ Tailnet up; all nodes reach <span class="kbd">http://&lt;coord-ip&gt;:8080/healthz</span></li>
+        <li>✅ Embeddings job runs across 3070+4060 concurrently; speedup vs. single GPU</li>
+        <li>✅ SD batch saturates the 5090 (verifiable 90%+ utilization)</li>
+        <li>⏭ Add credit ledger (walltime × VRAM)</li>
+        <li>⏭ Implement LoRA FedAvg loop (adapters only)</li>
+        <li>⏭ Prototype speculative decoding: 8B drafts + larger verifier</li>
+      </ul>
+      <p class="callout"><strong>HK‑47 Note:</strong> Observation: decentralized swarms avoid central choke points. Recommendation: deploy more meatbag GPUs.</p>
+    </section>
+
+    <footer>
+      <p>© 2025 Tangnet — Backyard Swarm v0.1 • Bring‑your‑own‑GPU, bring‑your‑own‑chaos. Crafted for 3070/4060/5090 + Pi control. MIT-ish vibes; license TBD.</p>
+    </footer>
+  </div>
+</body>
+</html>
