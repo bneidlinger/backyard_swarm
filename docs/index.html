@@ -592,15 +592,18 @@
 
       try {
         await navigator.clipboard.writeText(pre.textContent);
-        const originalText = btn.innerHTML;
+        const originalHTML = btn.innerHTML;
+        const originalLabel = btn.getAttribute('aria-label');
         btn.innerHTML = '<span>✓</span> Copied';
+        btn.setAttribute('aria-label', 'Copied!');
         btn.style.background = 'var(--accent-success)';
         btn.style.color = 'var(--bg-primary)';
 
         setTimeout(() => {
-          btn.innerHTML = originalText;
+          btn.innerHTML = originalHTML;
           btn.style.background = '';
           btn.style.color = '';
+          btn.setAttribute('aria-label', originalLabel);
         }, 1500);
       } catch (err) {
         console.warn('Copy failed:', err);
@@ -791,7 +794,7 @@
       <div class="code-container">
         <div class="code-header">
           <span class="code-title">ops/compose-coordinator.yml</span>
-          <button class="copy-btn">
+          <button class="copy-btn" type="button" aria-label="Copy to clipboard">
             <span>📋</span> Copy
           </button>
         </div>
@@ -827,7 +830,7 @@ networks:
       <div class="code-container">
         <div class="code-header">
           <span class="code-title">Launch Coordinator</span>
-          <button class="copy-btn">
+          <button class="copy-btn" type="button" aria-label="Copy to clipboard">
             <span>📋</span> Copy
           </button>
         </div>
@@ -837,7 +840,7 @@ networks:
       <div class="code-container">
         <div class="code-header">
           <span class="code-title">Worker on Each GPU Box</span>
-          <button class="copy-btn">
+          <button class="copy-btn" type="button" aria-label="Copy to clipboard">
             <span>📋</span> Copy
           </button>
         </div>
@@ -864,7 +867,7 @@ networks:
       <div class="code-container">
         <div class="code-header">
           <span class="code-title">jobs/embeddings.py</span>
-          <button class="copy-btn">
+          <button class="copy-btn" type="button" aria-label="Copy to clipboard">
             <span>📋</span> Copy
           </button>
         </div>
@@ -905,7 +908,7 @@ if __name__ == "__main__":
       <div class="code-container">
         <div class="code-header">
           <span class="code-title">Execute Embeddings Job</span>
-          <button class="copy-btn">
+          <button class="copy-btn" type="button" aria-label="Copy to clipboard">
             <span>📋</span> Copy
           </button>
         </div>
@@ -918,7 +921,7 @@ if __name__ == "__main__":
       <div class="code-container">
         <div class="code-header">
           <span class="code-title">jobs/sd_batch.py</span>
-          <button class="copy-btn">
+          <button class="copy-btn" type="button" aria-label="Copy to clipboard">
             <span>📋</span> Copy
           </button>
         </div>
@@ -950,7 +953,7 @@ if __name__ == "__main__":
       <div class="code-container">
         <div class="code-header">
           <span class="code-title">Execute Batch Rendering</span>
-          <button class="copy-btn">
+          <button class="copy-btn" type="button" aria-label="Copy to clipboard">
             <span>📋</span> Copy
           </button>
         </div>
