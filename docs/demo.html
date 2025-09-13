@@ -9,25 +9,25 @@
   <!-- Cool Rick aesthetic with subtle sci-fi touches -->
   <style>
     :root {
-      /* Cool Rick palette: muted, professional, understated competence */
-      --bg-primary: #1a1d23;
-      --bg-secondary: #242932;
-      --bg-tertiary: #2f3441;
-      --text-primary: #e8eaed;
-      --text-secondary: #bdc1c6;
-      --text-muted: #9aa0a6;
+      /* 80's Hacker Terminal + Cool Rick aesthetic */
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #151515;
+      --bg-tertiary: #202020;
+      --text-primary: #00ff41;
+      --text-secondary: #00cc33;
+      --text-muted: #008822;
 
-      /* Subtle Rick Sanchez sci-fi accents */
-      --accent-portal: #00d4aa;
-      --accent-portal-dim: #00a085;
-      --accent-interdim: #5f6fff;
-      --accent-warn: #ffa726;
-      --accent-danger: #ff6b6b;
-      --accent-success: #66bb6a;
+      /* 80's terminal vibes with Rick Sanchez sci-fi */
+      --accent-portal: #00ff41;    /* Matrix green */
+      --accent-portal-dim: #00cc33;
+      --accent-interdim: #ff6600;  /* Orange amber */
+      --accent-warn: #ffaa00;      /* Amber warning */
+      --accent-danger: #ff0040;    /* Red alert */
+      --accent-success: #00ff41;   /* Terminal green */
 
-      /* Understated gradients and glows */
-      --glow-portal: rgba(0, 212, 170, 0.15);
-      --glow-interdim: rgba(95, 111, 255, 0.1);
+      /* Retro CRT glows */
+      --glow-portal: rgba(0, 255, 65, 0.2);
+      --glow-interdim: rgba(255, 102, 0, 0.15);
 
       --mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Monaco, 'Courier New', monospace;
       --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -49,25 +49,48 @@
       overflow-x: hidden;
     }
 
-    /* Enhanced background animation for demo */
+    /* 80's CRT scanline effect */
     body::before {
       content: '';
       position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(ellipse at center, var(--glow-portal) 0%, transparent 50%);
-      animation: drift 45s ease-in-out infinite;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 65, 0.03) 0px,
+        rgba(0, 255, 65, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      animation: scanlines 0.1s linear infinite;
       z-index: -1;
-      opacity: 0.4;
+      pointer-events: none;
     }
 
-    @keyframes drift {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      25% { transform: translate(-20px, -20px) rotate(0.5deg); }
-      50% { transform: translate(20px, -30px) rotate(-0.5deg); }
-      75% { transform: translate(-30px, 20px) rotate(0.25deg); }
+    /* Retro terminal flicker */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, transparent 40%, rgba(0, 255, 65, 0.05));
+      animation: flicker 2s ease-in-out infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes scanlines {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(2px); }
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
     }
 
     .container {
@@ -83,6 +106,48 @@
       padding: 2rem 0;
       border-bottom: 1px solid var(--bg-tertiary);
       position: relative;
+    }
+
+    /* 80's Terminal ASCII Art Title */
+    .ascii-title {
+      margin-bottom: 2rem;
+    }
+
+    .ascii-art {
+      font-family: var(--mono);
+      font-size: clamp(8px, 1.1vw, 11px);
+      line-height: 1.1;
+      color: var(--text-primary);
+      text-shadow: 0 0 10px currentColor;
+      background: var(--bg-secondary);
+      border: 2px solid var(--accent-portal);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0;
+      box-shadow:
+        0 0 20px var(--glow-portal),
+        inset 0 0 20px rgba(0, 255, 65, 0.1);
+      position: relative;
+      overflow-x: auto;
+    }
+
+    /* Terminal-style border glow animation */
+    .ascii-art::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--accent-portal), transparent, var(--accent-portal));
+      border-radius: 10px;
+      z-index: -1;
+      animation: border-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes border-pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
     }
 
     .back-link {
@@ -110,15 +175,19 @@
       justify-content: center;
       width: 60px;
       height: 60px;
-      background: linear-gradient(135deg, var(--accent-portal), var(--accent-interdim));
-      border-radius: 16px;
+      background: var(--bg-primary);
+      border: 2px solid var(--accent-portal);
+      border-radius: 8px;
       font-family: var(--mono);
       font-weight: 700;
       font-size: 18px;
-      color: var(--bg-primary);
+      color: var(--accent-portal);
       letter-spacing: -1px;
-      box-shadow: 0 8px 32px var(--glow-portal), inset 0 1px 0 rgba(255,255,255,0.1);
+      box-shadow:
+        0 0 20px var(--glow-portal),
+        inset 0 0 20px rgba(0, 255, 65, 0.1);
       position: relative;
+      text-shadow: 0 0 10px currentColor;
       animation: pulse 3s ease-in-out infinite;
     }
 
@@ -466,10 +535,10 @@
       color: var(--accent-warn);
     }
 
-    /* Console Output */
+    /* Console Output with stainless steel backing */
     .console {
       background: var(--bg-primary);
-      border: 1px solid var(--bg-tertiary);
+      border: 2px solid #444;
       border-radius: 12px;
       padding: 1.5rem;
       font-family: var(--mono);
@@ -478,6 +547,49 @@
       max-height: 300px;
       overflow-y: auto;
       margin-top: 1rem;
+      position: relative;
+      box-shadow:
+        0 4px 16px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 0 30px rgba(0, 255, 65, 0.1);
+    }
+
+    /* Stainless steel back plate effect for console */
+    .console::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg,
+        #c0c0c0 0%,
+        #e8e8e8 25%,
+        #f0f0f0 50%,
+        #e8e8e8 75%,
+        #c0c0c0 100%
+      );
+      border-radius: 14px;
+      z-index: -1;
+    }
+
+    /* Brushed steel texture overlay for console */
+    .console::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background:
+        repeating-linear-gradient(90deg,
+          transparent 0px,
+          rgba(255,255,255,0.1) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      border-radius: 14px;
+      z-index: -1;
     }
 
     .console-line {
@@ -498,9 +610,18 @@
       font-weight: 600;
     }
 
-    .console-level.info { color: var(--accent-portal); }
-    .console-level.success { color: var(--accent-success); }
-    .console-level.warn { color: var(--accent-warn); }
+    .console-level.info {
+      color: var(--accent-portal);
+      text-shadow: 0 0 5px currentColor;
+    }
+    .console-level.success {
+      color: var(--accent-success);
+      text-shadow: 0 0 5px currentColor;
+    }
+    .console-level.warn {
+      color: var(--accent-warn);
+      text-shadow: 0 0 5px currentColor;
+    }
 
     .console-message {
       color: var(--text-secondary);
@@ -731,10 +852,25 @@
   <div class="container">
     <header class="header">
       <a href="index.html" class="back-link">← Back to Main</a>
-      <div class="logo-container">
-        <div class="logo">🔥</div>
+      <div class="ascii-title">
+        <pre class="ascii-art">
+╔═══════════════════════════════════════════════════════════════════════╗
+║  ██████   █████   ██████ ██   ██ ██    ██  █████  ██████  ██████       ║
+║  ██   ██ ██   ██ ██      ██  ██   ██  ██  ██   ██ ██   ██ ██   ██      ║
+║  ██████  ███████ ██      █████     ████   ███████ ██████  ██   ██      ║
+║  ██   ██ ██   ██ ██      ██  ██     ██    ██   ██ ██   ██ ██   ██      ║
+║  ██████  ██   ██  ██████ ██   ██    ██    ██   ██ ██   ██ ██████       ║
+║                                                                        ║
+║   ███████ ██     ██  █████  ██████  ███    ███                        ║
+║   ██      ██     ██ ██   ██ ██   ██ ████  ████                        ║
+║   ███████ ██  █  ██ ███████ ██████  ██ ████ ██                        ║
+║        ██ ██ ███ ██ ██   ██ ██   ██ ██  ██  ██                        ║
+║   ███████  ███ ███  ██   ██ ██   ██ ██      ██                        ║
+║                                                                        ║
+║                         >> LIVE DEMO SIMULATION <<                    ║
+╚═══════════════════════════════════════════════════════════════════════╝
+</pre>
       </div>
-      <h1 class="title">Live Demo</h1>
       <p class="subtitle">See your Backyard Swarm in action — real-time distributed AI workloads across heterogeneous hardware</p>
     </header>
 
