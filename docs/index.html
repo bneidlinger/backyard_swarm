@@ -93,6 +93,32 @@
       50% { opacity: 0.8; }
     }
 
+    /* Retro loading screen */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-portal);
+      font-family: var(--mono);
+      font-size: 2rem;
+      z-index: 9999;
+    }
+
+    #loading-screen span {
+      animation: blink 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -613,6 +639,7 @@
 </head>
 
 <body>
+  <div id="loading-screen"><span>BOOTING...</span></div>
   <div class="container">
     <header class="header">
       <div class="ascii-title">
@@ -1052,5 +1079,11 @@ if __name__ == "__main__":
       Crafted for 3070/4060/5090 + Pi coordination. MIT-ish vibes; license TBD.</p>
     </footer>
   </div>
+  <script>
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('loading-screen');
+      if (loader) loader.style.display = 'none';
+    });
+  </script>
 </body>
 </html>
